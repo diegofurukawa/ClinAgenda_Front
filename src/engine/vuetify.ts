@@ -12,12 +12,26 @@ export default createVuetify({
     messages: { pt }
   },
   theme: {
-    defaultTheme: 'dark',
+    defaultTheme: 'dark', // Tema padrão ao iniciar a aplicação
     themes: {
       dark: {
+        // Configuração do tema escuro
         dark: true,
         colors: {
-          primary: colors.yellow.darken1
+          primary: colors.lightBlue.darken1,
+          secondary: colors.purple.darken2,
+          error: colors.red.darken1
+          // Outras cores aqui
+        }
+      },
+      light: {
+        // Configuração do tema claro
+        dark: false,
+        colors: {
+          primary: colors.green.accent3,
+          secondary: colors.purple.lighten2,
+          error: colors.red.accent2
+          // Versões mais claras das cores
         }
       }
     }
@@ -74,6 +88,9 @@ export default createVuetify({
       density: 'comfortable',
       hideDetails: true,
       color: 'primary'
+    },
+    VAppBar: {
+      color: 'blue-darken-4' // Ou qualquer outra cor definida no seu tema
     }
   },
   icons: {
@@ -84,3 +101,4 @@ export default createVuetify({
     }
   }
 })
+

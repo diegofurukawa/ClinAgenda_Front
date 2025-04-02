@@ -14,7 +14,8 @@
 │   │   └── logo.svg
 │   ├── components
 │   │   ├── ClinDatePicker.vue
-│   │   └── ClinicToast.vue
+│   │   ├── ClinicToast.vue
+│   │   └── ClinLoading.vue
 │   ├── engine
 │   │   ├── httpClient.ts
 │   │   ├── mock.ts
@@ -50,5 +51,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-13 directories, 37 files
-
+13 directories, 38 files

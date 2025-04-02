@@ -10,3 +10,4 @@
 <script setup lang="ts">
 import ClinicToast from '@/components/ClinicToast.vue'
 </script>
+

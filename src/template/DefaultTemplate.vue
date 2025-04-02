@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-app>
     <!-- App Bar -->
     <v-app-bar elevation="2">
       <template #prepend>
@@ -18,7 +18,7 @@
           <template #activator="{ props }">
             <v-btn icon v-bind="props">
               <v-avatar color="primary" size="32">
-                <span class="text-white">{{ userInitials }}</span>
+                <span class="text-white">{{ authStore.userInitials }}</span>
               </v-avatar>
             </v-btn>
           </template>
@@ -55,55 +55,59 @@
         <v-list-item prepend-icon="mdi-calendar-clock" title="Agendamentos"></v-list-item>
         <v-list-item prepend-icon="mdi-account-group" title="Pacientes"></v-list-item>
         <v-list-item prepend-icon="mdi-doctor" title="Médicos"></v-list-item>
+
+        <v-list-item prepend-icon="mdi-status" title="Status"></v-list-item>
+        <v-list-item prepend-icon="mdi-specialty" title="Especialidades"></v-list-item>
+
         <v-list-item prepend-icon="mdi-cog" title="Configurações"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <!-- Main Content -->
-    <v-main class="bg-grey-lighten-4">
+
+    <!-- <v-main class="bg-grey-lighten-4">
       <v-container fluid>
-        <slot></slot>
+        <router-view></router-view>
       </v-container>
-    </v-main>
+    </v-main> -->
+
+    <router-view></router-view>
 
     <!-- Footer -->
     <v-footer app class="text-center d-flex flex-column">
       <div>
-        <small>&copy; {{ new Date().getFullYear() }} ClinAgenda - Bootcamp DEVPIRA + PECEGE</small>
+        <small
+          >&copy; {{ new Date().getFullYear() }} ClinAgenda - Sistema para Controle de Pacientes e
+          Recpeção - Desenvolvido por Diego Furukawa inc.
+        </small>
       </div>
     </v-footer>
-  </div>
+
+    <!-- Toast component -->
+    <ClinicToast />
+  </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
+import { useAuthStore } from '@/stores/auth'
+import ClinicToast from '@/components/ClinicToast.vue'
 
 const router = useRouter()
 const toastStore = useToastStore()
+const authStore = useAuthStore()
 const drawer = ref(false)
 
 // User state - this would normally come from a user store
 const userName = ref('Usuário')
 const userEmail = ref('usuario@exemplo.com')
 
-// Computed property for user initials
-const userInitials = computed(() => {
-  if (!userName.value) return '?'
-  return userName.value
-    .split(' ')
-    .map((name) => name[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-})
-
 // Logout function
-const logout = () => {
-  // Clear auth data
-  localStorage.removeItem('clinagenda_user')
-  localStorage.removeItem('clinagenda_remember')
+const logout = async () => {
+  // Use the auth store's logout function
+  await authStore.logout()
 
   // Show success message
   toastStore.setToast({
@@ -117,14 +121,13 @@ const logout = () => {
 
 // Load user data on mount
 onMounted(() => {
-  const userData = localStorage.getItem('clinagenda_user')
-  if (userData) {
-    const user = JSON.parse(userData)
-    if (user.email) {
-      userEmail.value = user.email
-      // Extract name from email for demo
-      userName.value = user.email.split('@')[0].replace('.', ' ')
-    }
+  if (authStore.user) {
+    userEmail.value = authStore.user.email || 'usuario@exemplo.com'
+    userName.value =
+      authStore.user.name ||
+      authStore.user.username ||
+      (authStore.user.email ? authStore.user.email.split('@')[0] : 'Usuário')
   }
 })
 </script>
+

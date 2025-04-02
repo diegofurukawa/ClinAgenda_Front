@@ -61,7 +61,7 @@
             :disabled="!formValid"
             class="mt-4"
           >
-            Entrar
+            ENTRAR
           </v-btn>
         </v-form>
       </v-card-text>
@@ -104,10 +104,14 @@ async function handleLogin() {
   loginError.value = false
 
   try {
+    console.log('Tentando login com:', { username: username.value })
+
     const success = await authStore.login({
       username: username.value,
       password: password.value
     })
+
+    console.log('Resultado do login:', success)
 
     if (success) {
       if (remember.value) {
@@ -119,13 +123,24 @@ async function handleLogin() {
         text: 'Login realizado com sucesso!'
       })
 
+      // Redireciona para a página principal após o login
+      console.log('Login bem-sucedido, redirecionando para dashboard')
       router.push('/')
     } else {
+      console.log('Login falhou, exibindo mensagem de erro')
       loginError.value = true
+      toastStore.setToast({
+        type: 'error',
+        text: 'Usuário ou senha incorretos. Por favor, tente novamente.'
+      })
     }
   } catch (error) {
-    console.error('Login error:', error)
+    console.error('Erro ao processar login:', error)
     loginError.value = true
+    toastStore.setToast({
+      type: 'error',
+      text: 'Ocorreu um erro ao processar o login. Por favor, tente novamente.'
+    })
   } finally {
     loading.value = false
   }

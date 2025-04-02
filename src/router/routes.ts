@@ -1,3 +1,4 @@
+// src/router/routes.ts
 import type { RouteRecordRaw } from 'vue-router'
 import { DefaultTemplate } from '@/template'
 
@@ -18,9 +19,10 @@ const routes: RouteRecordRaw[] = [
         name: 'dashboard',
         component: () => import('@/pages/dashboard/DashboardPage.vue')
       }
+      // Outras rotas protegidas aqui
     ]
   },
-  // Catch-all / 404 route
+  // Rota de fallback
   {
     path: '/:pathMatch(.*)*',
     redirect: '/'
@@ -28,4 +30,3 @@ const routes: RouteRecordRaw[] = [
 ]
 
 export default routes
-
