@@ -1,37 +1,51 @@
-<script setup lang="ts">
-import { useToastStore } from '@/stores'
-
-const toastStore = useToastStore()
-</script>
-
 <template>
-  <div class="notification-container">
-    <v-slide-y-transition group>
-      <v-alert
-        v-for="message in toastStore.messages"
-        :key="message.text"
-        :color="message.type"
-        :elevation="12"
-      >
-        <div v-html="message.text"></div>
-      </v-alert>
-    </v-slide-y-transition>
+  <div class="toast-container">
+    <v-snackbar
+      v-for="(toast, index) in toastStore.messages"
+      :key="index"
+      v-model="visibleToasts[index]"
+      :color="toast.type"
+      timeout="3000"
+      location="top right"
+      :class="`mt-${index * 2 + 2}`"
+    >
+      {{ toast.text }}
+      <template #actions>
+        <v-btn icon variant="text" @click="visibleToasts[index] = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
-<style scoped>
-.notification-container {
-  position: fixed;
-  top: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: grid;
-  grid-gap: 0.5em;
-  z-index: 9999;
-}
+<script setup lang="ts">
+import { useToastStore } from '@/stores/toast'
+import { watch, ref } from 'vue'
 
-.notification-container:deep(a) {
-  color-scheme: dark;
-  color: inherit;
+const toastStore = useToastStore()
+
+// Track visibility of each toast
+const visibleToasts = ref<Record<number, boolean>>({})
+
+// Initialize visibility of toasts
+watch(
+  () => toastStore.messages,
+  (messages) => {
+    messages.forEach((_, index) => {
+      visibleToasts.value[index] = true
+    })
+  },
+  { immediate: true, deep: true }
+)
+</script>
+
+<style scoped>
+.toast-container {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
 }
 </style>
+

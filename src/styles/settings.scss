@@ -1,10 +1,125 @@
-/**
- * src/styles/settings.scss
- *
- * Configures SASS variables and Vuetify overwrites
- */
+// Vuetify SCSS Variables
+// https://vuetifyjs.com/en/features/sass-variables/
 
-// https://vuetifyjs.com/features/sass-variables/`
-// @use 'vuetify/settings' with (
-//   $color-pack: false
-// );
+// Custom color palette
+$primary-colors: (
+  'base': #f2c94c,
+  // Yellow primary
+  'lighten-5': #fffde7,
+  'lighten-4': #fff9c4,
+  'lighten-3': #fff59d,
+  'lighten-2': #fff176,
+  'lighten-1': #ffee58,
+  'darken-1': #e6b12e,
+  'darken-2': #d39e12,
+  'darken-3': #c08b00,
+  'darken-4': #a87800
+);
+
+$secondary-colors: (
+  'base': #34495e,
+  // Dark blue-gray
+  'lighten-5': #eceff1,
+  'lighten-4': #cfd8dc,
+  'lighten-3': #b0bec5,
+  'lighten-2': #90a4ae,
+  'lighten-1': #78909c,
+  'darken-1': #2c3e50,
+  'darken-2': #233240,
+  'darken-3': #1a252f,
+  'darken-4': #0d1318
+);
+
+// Custom typography
+$font-size-root: 16px;
+$border-radius-root: 6px;
+$heading-font-family: 'Roboto', sans-serif;
+$body-font-family: 'Roboto', sans-serif;
+
+// Custom variables
+$card-elevation: 1;
+$card-hover-elevation: 4;
+
+// Transitions
+$standard-easing: cubic-bezier(0.4, 0, 0.2, 1);
+$transition-fast: 0.15s $standard-easing;
+$transition-normal: 0.25s $standard-easing;
+$transition-slow: 0.4s $standard-easing;
+
+// Custom mixins
+@mixin clickable-card {
+  cursor: pointer;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@mixin truncate-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin responsive-padding {
+  padding: 12px;
+
+  @media (min-width: 600px) {
+    padding: 16px;
+  }
+
+  @media (min-width: 960px) {
+    padding: 24px;
+  }
+}
+
+// Common utility classes
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.truncate {
+  @include truncate-text;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.d-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Global styles
+html,
+body {
+  overflow-x: hidden;
+
+  @media print {
+    font-size: 12px;
+  }
+}
+
+// Form field customization
+.v-field {
+  &--focused {
+    box-shadow: 0 0 0 2px rgba(var(--v-theme-primary), 0.2);
+  }
+
+  &__input {
+    letter-spacing: 0.01em;
+  }
+}
