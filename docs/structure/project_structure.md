@@ -20,25 +20,33 @@
 │   │   ├── httpClient.ts
 │   │   ├── mock.ts
 │   │   └── vuetify.ts
+│   ├── interfaces
+│   │   └── status.ts
 │   ├── main.ts
 │   ├── pages
 │   │   ├── auth
 │   │   │   └── LoginPage.vue
-│   │   └── dashboard
-│   │   └── DashboardPage.vue
+│   │   ├── dashboard
+│   │   │   └── DashboardPage.vue
+│   │   └── status
+│   │   ├── index.ts
+│   │   ├── StatusFormPage.vue
+│   │   └── StatusListPage.vue
 │   ├── router
 │   │   ├── index.ts
 │   │   └── routes.ts
 │   ├── stores
 │   │   ├── auth.ts
 │   │   ├── index.ts
+│   │   ├── status.ts
 │   │   └── toast.ts
 │   ├── styles
 │   │   ├── README.md
 │   │   └── settings.scss
 │   ├── template
 │   │   ├── DefaultTemplate.vue
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   └── ModelTemplate.vue
 │   └── utils
 │   ├── dateFormat.ts
 │   ├── index.ts
@@ -51,4 +59,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-13 directories, 38 files
+15 directories, 44 files

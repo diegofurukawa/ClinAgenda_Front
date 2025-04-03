@@ -50,10 +50,21 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: process.env.NODE_ENV !== 'production'
   },
+  // Configuração para o sass
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: '@import "@/styles/settings.scss";'
+        // Evita o uso da API JS legada do Sass
+        sassOptions: {
+          charset: false,
+          outputStyle: 'expanded',
+          javascriptEnabled: false // Isso ajuda a evitar a API JS legada
+        },
+        // Exemplo de definição de variáveis globais em vez de @import
+        additionalData: `
+          $primary: #f2c94c;
+          $secondary: #34495e;
+        `
       }
     }
   }

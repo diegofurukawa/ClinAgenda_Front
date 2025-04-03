@@ -82,6 +82,7 @@ $transition-slow: 0.4s $standard-easing;
 // Common utility classes
 .clickable {
   cursor: pointer;
+  -webkit-user-select: none; // Para Safari iOS
   user-select: none;
 }
 
@@ -123,3 +124,4 @@ body {
     letter-spacing: 0.01em;
   }
 }
+
