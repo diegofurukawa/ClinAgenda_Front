@@ -1,8 +1,5 @@
 .
 ├── components.d.ts
-├── enum
-│   ├── index.ts
-│   └── pageMode.ts
 ├── env.d.ts
 ├── eslint.config.js
 ├── index.html
@@ -25,6 +22,9 @@
 │   │   ├── httpClient.ts
 │   │   ├── mock.ts
 │   │   └── vuetify.ts
+│   ├── enum
+│   │   ├── index.ts
+│   │   └── pageMode.ts
 │   ├── interfaces
 │   │   ├── doctor.ts
 │   │   ├── index.ts
@@ -40,6 +40,8 @@
 │   │   ├── doctor
 │   │   │   ├── DoctorFormPage.vue
 │   │   │   └── DoctorListPage.vue
+│   │   ├── notfound
+│   │   │   └── NotFoundPage.vue
 │   │   ├── patient
 │   │   │   ├── PatientFormPage.vue
 │   │   │   └── PatientListPage.vue
@@ -76,4 +78,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-20 directories, 56 files
+21 directories, 57 files

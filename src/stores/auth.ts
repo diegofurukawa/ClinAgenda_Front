@@ -2,32 +2,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import request from '@/engine/httpClient'
-
-interface User {
-  userId: number
-  username: string
-  email: string
-  name?: string
-  avatar?: string
-  roles: string[]
-  tokenExpires: string
-}
-
-interface LoginResponse {
-  userId: number
-  username: string
-  email: string
-  token: string
-  roles: string[]
-  tokenExpires: string
-  success?: boolean
-  message?: string
-}
-
-interface LoginCredentials {
-  username: string
-  password: string
-}
+import type { IUserAuth as User, LoginCredentials, LoginResponse } from '@/interfaces/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -226,3 +201,4 @@ export const useAuthStore = defineStore('auth', () => {
     setToken
   }
 })
+

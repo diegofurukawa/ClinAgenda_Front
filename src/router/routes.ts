@@ -1,169 +1,145 @@
-// src/router/routes.ts
 import type { RouteRecordRaw } from 'vue-router'
+import { PageMode } from '@/enum'
 
-// Define route metadata including roles and page titles
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('@/pages/auth/LoginPage.vue'),
-    meta: {
-      requiresAuth: false,
-      title: 'Login'
-    }
-  },
+// Pages
+import HomePage from '@/pages/home/HomePage.vue'
+import DashboardPage from '@/pages/dashboard/DashboardPage.vue'
+import LoginPage from '@/pages/auth/LoginPage.vue'
+import NotFoundPage from '@/pages/notfound/NotFoundPage.vue'
+
+import StatusListPage from '@/pages/status/StatusListPage.vue'
+import StatusFormPage from '@/pages/status/StatusFormPage.vue'
+
+import SpecialtyListPage from '@/pages/specialty/SpecialtyListPage.vue'
+import SpecialtyFormPage from '@/pages/specialty/SpecialtyFormPage.vue'
+
+import PatientListPage from '@/pages/patient/PatientListPage.vue'
+import PatientFormPage from '@/pages/patient/PatientFormPage.vue'
+
+import DoctorListPage from '@/pages/doctor/DoctorListPage.vue'
+import DoctorFormPage from '@/pages/doctor/DoctorFormPage.vue'
+
+// Templates
+import DefaultTemplate from '@/template/DefaultTemplate.vue'
+
+export const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    component: () => import('@/template/DefaultTemplate.vue'),
-    meta: { requiresAuth: true },
+    component: DefaultTemplate,
     children: [
       {
-        path: '',
+        path: '/',
+        name: 'home',
+        component: HomePage,
+        meta: {
+          requiresAuth: true,
+          title: 'Home'
+        }
+      },
+
+      {
+        path: '/dashboard',
         name: 'dashboard',
-        component: () => import('@/pages/dashboard/DashboardPage.vue'),
+        component: DashboardPage,
         meta: {
-          title: 'Dashboard',
-          requiresAuth: true
+          requiresAuth: true,
+          title: 'Dashboard'
         }
       },
 
-      // Status Management routes
       {
-        path: 'status',
+        path: '/status',
         name: 'status-list',
-        component: () => import('@/pages/status/StatusListPage.vue'),
+        component: StatusListPage,
         meta: {
-          title: 'Lista de Status',
           requiresAuth: true,
-          roles: ['admin'] // Only admin can access
+          title: 'Status'
         }
       },
       {
-        path: 'status/insert',
-        name: 'status-insert',
-        component: () => import('@/pages/status/StatusFormPage.vue'),
-        meta: {
-          title: 'Adicionar Status',
-          requiresAuth: true,
-          roles: ['admin']
-        }
-      },
-      {
-        path: 'status/update/:id',
+        path: '/status/:id',
         name: 'status-update',
-        component: () => import('@/pages/status/StatusFormPage.vue'),
-        props: true,
+        component: StatusFormPage,
         meta: {
-          title: 'Editar Status',
           requiresAuth: true,
-          roles: ['admin']
+          title: 'Status Update',
+          mode: PageMode.PAGE_UPDATE
         }
       },
 
-      // Specialty Management routes
       {
         path: 'specialty',
         name: 'specialty-list',
-        component: () => import('@/pages/specialty/SpecialtyListPage.vue'),
+        component: SpecialtyListPage,
         meta: {
-          title: 'Lista de Especialidades',
-          requiresAuth: true
-        }
-      },
-      {
-        path: 'specialty/insert',
-        name: 'specialty-insert',
-        component: () => import('@/pages/specialty/SpecialtyFormPage.vue'),
-        meta: {
-          title: 'Adicionar Especialidade',
           requiresAuth: true,
-          roles: ['admin']
+          title: 'Especialidades'
         }
       },
       {
-        path: 'specialty/update/:id',
+        path: '/specialty/:id',
         name: 'specialty-update',
-        component: () => import('@/pages/specialty/SpecialtyFormPage.vue'),
-        props: true,
+        component: SpecialtyFormPage,
         meta: {
-          title: 'Editar Especialidade',
           requiresAuth: true,
-          roles: ['admin']
+          title: 'Especialidade Update',
+          mode: PageMode.PAGE_UPDATE
         }
       },
-
-      // Patient Management routes
       {
-        path: 'patient',
+        path: '/patient',
         name: 'patient-list',
-        component: () => import('@/pages/patient/PatientListPage.vue'),
+        component: PatientListPage,
         meta: {
-          title: 'Lista de Pacientes',
-          requiresAuth: true
+          requiresAuth: true,
+          title: 'Pacientes'
         }
       },
       {
-        path: 'patient/insert',
-        name: 'patient-insert',
-        component: () => import('@/pages/patient/PatientFormPage.vue'),
-        meta: {
-          title: 'Adicionar Paciente',
-          requiresAuth: true
-        }
-      },
-      {
-        path: 'patient/update/:id',
+        path: '/patient/:id',
         name: 'patient-update',
-        component: () => import('@/pages/patient/PatientFormPage.vue'),
-        props: true,
+        component: PatientFormPage,
         meta: {
-          title: 'Editar Paciente',
-          requiresAuth: true
+          requiresAuth: true,
+          title: 'Paciente Update',
+          mode: PageMode.PAGE_UPDATE
         }
       },
-
-      // Doctor Management routes
       {
-        path: 'doctor',
+        path: '/doctor',
         name: 'doctor-list',
-        component: () => import('@/pages/doctor/DoctorListPage.vue'),
+        component: DoctorListPage,
         meta: {
-          title: 'Lista de Médicos',
-          requiresAuth: true
-        }
-      },
-      {
-        path: 'doctor/insert',
-        name: 'doctor-insert',
-        component: () => import('@/pages/doctor/DoctorFormPage.vue'),
-        meta: {
-          title: 'Adicionar Médico',
           requiresAuth: true,
-          roles: ['admin']
+          title: 'Médicos'
         }
       },
       {
-        path: 'doctor/update/:id',
+        path: '/doctor/:id',
         name: 'doctor-update',
-        component: () => import('@/pages/doctor/DoctorFormPage.vue'),
-        props: true,
+        component: DoctorFormPage,
         meta: {
-          title: 'Editar Médico',
           requiresAuth: true,
-          roles: ['admin']
+          title: 'Médico Update',
+          mode: PageMode.PAGE_UPDATE
         }
       }
     ]
   },
-
-  // Page not found - 404
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginPage,
+    meta: {
+      title: 'Login'
+    }
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: () => import('@/pages/notfound/NotFoundPage.vue'),
+    component: NotFoundPage,
     meta: {
-      title: 'Página não encontrada',
-      requiresAuth: false
+      title: 'Página não encontrada'
     }
   }
 ]

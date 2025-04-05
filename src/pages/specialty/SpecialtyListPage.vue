@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { DefaultTemplate } from '@/template'
-import { mdiPlusCircle, mdiTrashCan, mdiSquareEditOutline } from '@mdi/js'
+// import { DefaultTemplate } from '@/template'
+import { mdiTrashCan, mdiSquareEditOutline } from '@mdi/js'
 import type {
   ISpecialty,
   GetSpecialtyListRequest,
@@ -84,73 +84,58 @@ const deleteListItem = async (item: ISpecialty) => {
 </script>
 
 <template>
-  <default-template>
-    <template #title> Lista de especialidades </template>
+  <v-sheet class="pa-4 mb-4">
+    <v-form @submit.prevent="loadDataTable">
+      <v-row>
+        <v-col>
+          <v-text-field v-model.trim="filterName" label="Nome" hide-details />
+        </v-col>
+        <v-col cols="auto" class="d-flex align-center">
+          <v-btn color="primary" type="submit">Filtrar</v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-sheet>
 
-    <template #action>
-      <v-btn color="primary" :prepend-icon="mdiPlusCircle" :to="{ name: 'specialty-insert' }">
-        Adicionar especialidade
-      </v-btn>
-    </template>
+  <v-data-table-server
+    v-model:items-per-page="itemsPerPage"
+    :headers="headers"
+    :items-length="total"
+    :items="items"
+    :loading="isLoadingList"
+    item-value="id"
+    @update:options="handleDataTableUpdate"
+  >
+    <template #[`item.scheduleDuration`]="{ item }"> {{ item.scheduleDuration }} min </template>
 
-    <template #default>
-      <v-sheet class="pa-4 mb-4">
-        <v-form @submit.prevent="loadDataTable">
-          <v-row>
-            <v-col>
-              <v-text-field v-model.trim="filterName" label="Nome" hide-details />
-            </v-col>
-            <v-col cols="auto" class="d-flex align-center">
-              <v-btn color="primary" type="submit">Filtrar</v-btn>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-sheet>
-
-      <v-data-table-server
-        v-model:items-per-page="itemsPerPage"
-        :headers="headers"
-        :items-length="total"
-        :items="items"
-        :loading="isLoadingList"
-        item-value="id"
-        @update:options="handleDataTableUpdate"
-      >
-        <template #[`item.scheduleDuration`]="{ item }"> {{ item.scheduleDuration }} min </template>
-        
-        <template #[`item.actions`]="{ item }">
-        
-          <!-- Edite Button -->
-        <v-tooltip text="Editar Especialidade" location="left">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              :icon="mdiSquareEditOutline"
-              size="small"
-              color="primary"
-              :to="{ name: 'patient-update', params: { id: item.id } }"
-            />
-
-          </template>
-        </v-tooltip>
-        
-        <!-- Delete Button -->
-        <v-tooltip text="Deletar Especialidade" location="left">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              :icon="mdiTrashCan"
-              size="small"
-              color="error"
-              class="mr-2"
-              @click="deleteListItem(item)"
-            />
-          </template>
-        </v-tooltip>
-
-
+    <template #[`item.actions`]="{ item }">
+      <!-- Edite Button -->
+      <v-tooltip text="Editar Especialidade" location="left">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            :icon="mdiSquareEditOutline"
+            size="small"
+            color="primary"
+            :to="{ name: 'patient-update', params: { id: item.id } }"
+          />
         </template>
-      </v-data-table-server>
+      </v-tooltip>
+
+      <!-- Delete Button -->
+      <v-tooltip text="Deletar Especialidade" location="left">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            :icon="mdiTrashCan"
+            size="small"
+            color="error"
+            class="mr-2"
+            @click="deleteListItem(item)"
+          />
+        </template>
+      </v-tooltip>
     </template>
-  </default-template>
+  </v-data-table-server>
 </template>
+

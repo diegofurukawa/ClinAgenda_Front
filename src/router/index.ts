@@ -32,6 +32,7 @@ router.beforeEach(async (to, from) => {
 
   // If route doesn't require auth, allow navigation
   if (!requiresAuth) {
+    console.log('Testando next')
     return true
   }
 

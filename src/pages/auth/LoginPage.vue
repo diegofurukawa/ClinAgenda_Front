@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useToastStore } from '@/stores/toast'
+import useToastStore from '@/stores/toast'
 import { mdiAccount, mdiLock, mdiEye, mdiEyeOff } from '@mdi/js'
 
 const router = useRouter()
@@ -210,3 +210,4 @@ onMounted(() => {
   font-weight: 600;
 }
 </style>
+

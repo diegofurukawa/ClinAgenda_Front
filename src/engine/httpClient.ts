@@ -1,7 +1,104 @@
-// src/engine/httpClient.ts
-import axios, { type Method } from 'axios'
-import type { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  Method
+} from 'axios'
+import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
+
+// Create Axios instance with default config
+const instance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BASE_HOST || 'http://localhost:3000/api',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json'
+  }
+})
+
+// Request interceptor for API calls
+instance.interceptors.request.use(
+  (config: AxiosRequestConfig): InternalAxiosRequestConfig => {
+    const authStore = useAuthStore()
+    const token = authStore.token
+
+    // Ensure headers exist
+    const updatedConfig = config as InternalAxiosRequestConfig
+
+    if (token) {
+      // Set the Authorization header
+      updatedConfig.headers = updatedConfig.headers || {}
+      updatedConfig.headers.Authorization = `Bearer ${token}`
+    }
+
+    return updatedConfig
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor for API calls
+instance.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response
+  },
+  async (error) => {
+    const authStore = useAuthStore()
+
+    if (error.response) {
+      // Handle 401 Unauthorized - Token expired or invalid
+      if (error.response.status === 401) {
+        authStore.logout()
+        window.location.href = '/login'
+        return Promise.reject(new Error('Sua sessão expirou. Por favor, faça login novamente.'))
+      }
+
+      // Handle other error responses
+      const errorMessage = error.response.data?.message || 'Ocorreu um erro na requisição.'
+      return Promise.reject(new Error(errorMessage))
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+export const httpClient = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    return instance.get<T>(url, config)
+  },
+
+  post: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => {
+    return instance.post<T>(url, data, config)
+  },
+
+  put: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => {
+    return instance.put<T>(url, data, config)
+  },
+
+  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    return instance.delete<T>(url, config)
+  },
+
+  patch: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => {
+    return instance.patch<T>(url, data, config)
+  }
+}
 
 const API_URL = import.meta.env.VITE_BASE_HOST
 
@@ -15,8 +112,6 @@ declare global {
     axios: typeof axios
   }
 }
-
-window.axios = axiosInstance
 
 // Interceptor para incluir o token de autenticação
 axiosInstance.interceptors.request.use(
@@ -141,3 +236,4 @@ export default async function request<T, R>({
     }
   }
 }
+

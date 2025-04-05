@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
 import { useAuthStore } from '@/stores/auth'
 import ClinicToast from '@/components/ClinicToast.vue'
-import { mdiAccountTag, mdiGroup, mdiHome, mdiPacMan, mdiDoctor, mdiTag } from '@mdi/js'
+import { mdiAccountTag, mdiHome, mdiPacMan, mdiDoctor, mdiTag } from '@mdi/js'
 
 const router = useRouter()
 const toastStore = useToastStore()
@@ -30,7 +30,7 @@ const allMenus = [
     icon: mdiHome,
     to: { name: 'dashboard' },
     requiresAuth: true,
-    roles: [] // Empty array means all authenticated users
+    roles: [] // All authenticated users
   },
   {
     title: 'Status',
@@ -43,22 +43,22 @@ const allMenus = [
     title: 'Especialidades',
     icon: mdiAccountTag,
     to: { name: 'specialty-list' },
-    requiresAuth: true,
-    roles: [] // All authenticated users
+    requiresAuth: false,
+    roles: []
   },
   {
     title: 'Pacientes',
     icon: mdiPacMan,
     to: { name: 'patient-list' },
     requiresAuth: true,
-    roles: [] // All authenticated users
+    roles: []
   },
   {
     title: 'Médicos',
     icon: mdiDoctor,
     to: { name: 'doctor-list' },
     requiresAuth: true,
-    roles: [] // All authenticated users
+    roles: []
   }
 ]
 
@@ -187,7 +187,12 @@ onMounted(() => {
             </div>
 
             <!-- Page Content -->
-            <slot></slot>
+
+            <!-- Antes estavamos passando por aqui... -->
+            <!-- <slot></slot> -->
+
+            <!-- Agora estamos passando por aqui...  -->
+            <router-view></router-view>
           </v-col>
         </v-row>
       </v-container>
@@ -221,3 +226,4 @@ $transition-fast: 0.15s $standard-easing;
 
 // Você pode incluir outras classes específicas conforme necessário...
 </style>
+

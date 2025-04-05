@@ -1,4 +1,4 @@
-import { fileURLToPath, URL } from 'node:url'
+// import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
@@ -6,6 +6,7 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import VueRouter from 'unplugin-vue-router/vite'
 import Components from 'unplugin-vue-components/vite'
 import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -37,7 +38,18 @@ export default defineConfig({
   define: { 'process.env': {} },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': path.resolve(__dirname, './src'),
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@engine': path.resolve(__dirname, './src/engine'),
+      '@enum': path.resolve(__dirname, './src/enum'),
+      '@interfaces': path.resolve(__dirname, './src/interfaces'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@router': path.resolve(__dirname, './src/router'),
+      '@stores': path.resolve(__dirname, './src/stores'),
+      '@styles': path.resolve(__dirname, './src/styles'),
+      '@template': path.resolve(__dirname, './src/template'),
+      '@utils': path.resolve(__dirname, './src/utils')
     },
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue']
   },
