@@ -1,18 +1,26 @@
+// src/stores/auth.ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import request from '@/engine/httpClient'
 
 interface User {
+  userId: number
+  username: string
   email: string
   name?: string
   avatar?: string
-  username?: string
+  roles: string[]
+  tokenExpires: string
 }
 
 interface LoginResponse {
+  userId: number
+  username: string
+  email: string
   token: string
-  user: User
-  success: boolean
+  roles: string[]
+  tokenExpires: string
+  success?: boolean
   message?: string
 }
 
@@ -26,18 +34,37 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const token = ref<string | null>(null)
   const loading = ref(false)
+  const tokenExpires = ref<string | null>(null)
 
   // Getters
-  const isAuthenticated = computed(() => !!token.value)
+  const isAuthenticated = computed(() => !!token.value && isTokenValid())
   const userInitials = computed(() => {
-    if (!user.value?.name) return '?'
-    return user.value.name
+    if (!user.value?.name && !user.value?.username) return '?'
+
+    const nameToUse = user.value.name || user.value.username || ''
+    return nameToUse
       .split(' ')
       .map((name) => name[0])
       .slice(0, 2)
       .join('')
       .toUpperCase()
   })
+
+  const hasRole = (role: string) => {
+    return user.value?.roles?.includes(role) || false
+  }
+
+  const isAdmin = computed(() => hasRole('admin'))
+
+  // Check if token is still valid based on expiration date
+  function isTokenValid(): boolean {
+    if (!tokenExpires.value) return false
+
+    const expiryDate = new Date(tokenExpires.value)
+    const now = new Date()
+
+    return expiryDate > now
+  }
 
   // Actions
   function setUser(newUser: User | null) {
@@ -49,17 +76,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function setToken(newToken: string | null) {
+  function setToken(newToken: string | null, expires: string | null = null) {
     token.value = newToken
+    tokenExpires.value = expires
+
     if (newToken) {
       localStorage.setItem('clinagenda_token', newToken)
-      // Configure o token para todas as requisições futuras
+      if (expires) {
+        localStorage.setItem('clinagenda_token_expires', expires)
+      }
+
+      // Configure token for all future requests
       if (window.axios) {
         window.axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
       }
     } else {
       localStorage.removeItem('clinagenda_token')
-      // Remove o token das requisições futuras
+      localStorage.removeItem('clinagenda_token_expires')
+
+      // Remove token from future requests
       if (window.axios) {
         delete window.axios.defaults.headers.common['Authorization']
       }
@@ -69,28 +104,32 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(credentials: LoginCredentials) {
     loading.value = true
     try {
-      console.info('1. Enviando dados para Login')
+      console.info('1. Sending login request')
 
       const response = await request<LoginCredentials, LoginResponse>({
         method: 'POST',
-        endpoint: 'auth/login', // Make sure 'api/' is included
+        endpoint: 'auth/login',
         body: credentials
       })
 
-      console.info('2. Dados enviados com Suceso')
-
-      //  !response.data.success
-
       if (response.isError) {
-        console.error('Login failed:', response.data.message || 'Unknown error')
-
-        console.info('3. Erro de Login')
-
+        console.error('Login failed:', response.message || 'Unknown error')
         return false
       }
 
-      setUser(response.data.user)
-      setToken(response.data.token)
+      console.info('2. Login successful')
+
+      // Create user object from response
+      const userData: User = {
+        userId: response.data.userId,
+        username: response.data.username,
+        email: response.data.email,
+        roles: response.data.roles,
+        tokenExpires: response.data.tokenExpires
+      }
+
+      setUser(userData)
+      setToken(response.data.token, response.data.tokenExpires)
       return true
     } catch (error) {
       console.error('Login error:', error)
@@ -102,6 +141,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function validateToken() {
     if (!token.value) return false
+
+    // Check if token is expired based on the stored expiry date
+    if (!isTokenValid()) {
+      // Token has expired, log the user out
+      console.info('Token expired, logging out')
+      logout()
+      return false
+    }
 
     try {
       const response = await request<{ token: string }, { valid: boolean }>({
@@ -139,6 +186,7 @@ export const useAuthStore = defineStore('auth', () => {
   function init() {
     const storedUser = localStorage.getItem('clinagenda_user')
     const storedToken = localStorage.getItem('clinagenda_token')
+    const storedExpires = localStorage.getItem('clinagenda_token_expires')
 
     if (storedUser) {
       try {
@@ -150,8 +198,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     if (storedToken) {
+      tokenExpires.value = storedExpires
       token.value = storedToken
-      // Configure o token para todas as requisições futuras
+
+      // Configure the token for all future requests
       if (window.axios) {
         window.axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
       }
@@ -167,6 +217,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     isAuthenticated,
     userInitials,
+    isAdmin,
+    hasRole,
     login,
     logout,
     validateToken,
@@ -174,4 +226,3 @@ export const useAuthStore = defineStore('auth', () => {
     setToken
   }
 })
-

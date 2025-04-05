@@ -1,5 +1,7 @@
+// src/engine/httpClient.ts
 import axios, { type Method } from 'axios'
 import type { AxiosRequestConfig } from 'axios'
+import router from '@/router'
 
 const API_URL = import.meta.env.VITE_BASE_HOST
 
@@ -34,12 +36,48 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response) {
+      const { status, data } = error.response
+
       // Token expirado ou inválido
-      localStorage.removeItem('clinagenda_token')
-      localStorage.removeItem('clinagenda_user')
-      window.location.href = '/login'
+      if (status === 401) {
+        // Limpa dados de autenticação
+        localStorage.removeItem('clinagenda_token')
+        localStorage.removeItem('clinagenda_user')
+        localStorage.removeItem('clinagenda_token_expires')
+
+        // Armazena a URL atual para redirecionamento após login
+        if (router.currentRoute.value.name !== 'login') {
+          localStorage.setItem(
+            'clinagenda_redirect_after_login',
+            router.currentRoute.value.fullPath
+          )
+
+          // Redireciona para a página de login
+          router.push('/login')
+        }
+      }
+
+      // Erro 403 - Forbidden (Permissão negada)
+      else if (status === 403) {
+        console.error(
+          'Acesso negado:',
+          data?.message || 'Você não tem permissão para acessar este recurso'
+        )
+
+        // Poderia redirecionar para uma página de acesso negado
+        // router.push('/acesso-negado')
+      }
+
+      // Erro 500 - Internal Server Error
+      else if (status >= 500) {
+        console.error('Erro do servidor:', data?.message || 'Ocorreu um erro no servidor')
+      }
+    } else if (error.request) {
+      // A requisição foi feita mas não houve resposta (problemas de rede)
+      console.error('Erro de rede:', 'Não foi possível conectar ao servidor')
     }
+
     return Promise.reject(error)
   }
 )

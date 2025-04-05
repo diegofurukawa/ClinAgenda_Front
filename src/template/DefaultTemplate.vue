@@ -1,22 +1,77 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
 import { useAuthStore } from '@/stores/auth'
 import ClinicToast from '@/components/ClinicToast.vue'
-import { mdiAccountTag, mdiGroup, mdiHome, mdiPacMan } from '@mdi/js'
-
-// Importar estilos - Método moderno para evitar avisos de depreciação
-// @use "@/styles/settings.scss";
+import { mdiAccountTag, mdiGroup, mdiHome, mdiPacMan, mdiDoctor, mdiTag } from '@mdi/js'
 
 const router = useRouter()
 const toastStore = useToastStore()
 const authStore = useAuthStore()
 const drawer = ref(false)
 
-// User state - this would normally come from a user store
-const userName = ref('Usuário')
-const userEmail = ref('usuario@exemplo.com')
+// Get user info from the auth store
+const userName = computed(() => {
+  if (authStore.user) {
+    return authStore.user.name || authStore.user.username || 'Usuário'
+  }
+  return 'Usuário'
+})
+
+const userEmail = computed(() => {
+  return authStore.user?.email || 'usuario@exemplo.com'
+})
+
+// Define all available menus
+const allMenus = [
+  {
+    title: 'Dashboard',
+    icon: mdiHome,
+    to: { name: 'dashboard' },
+    requiresAuth: true,
+    roles: [] // Empty array means all authenticated users
+  },
+  {
+    title: 'Status',
+    icon: mdiTag,
+    to: { name: 'status-list' },
+    requiresAuth: true,
+    roles: ['admin'] // Only admin can access
+  },
+  {
+    title: 'Especialidades',
+    icon: mdiAccountTag,
+    to: { name: 'specialty-list' },
+    requiresAuth: true,
+    roles: [] // All authenticated users
+  },
+  {
+    title: 'Pacientes',
+    icon: mdiPacMan,
+    to: { name: 'patient-list' },
+    requiresAuth: true,
+    roles: [] // All authenticated users
+  },
+  {
+    title: 'Médicos',
+    icon: mdiDoctor,
+    to: { name: 'doctor-list' },
+    requiresAuth: true,
+    roles: [] // All authenticated users
+  }
+]
+
+// Filter menus based on user's permissions
+const menus = computed(() => {
+  return allMenus.filter((menu) => {
+    // If no roles are specified or roles array is empty, anyone can see it
+    if (!menu.roles || menu.roles.length === 0) return true
+
+    // Otherwise check if user has any of the required roles
+    return menu.roles.some((role) => authStore.hasRole(role))
+  })
+})
 
 // Logout function
 const logout = async () => {
@@ -33,37 +88,12 @@ const logout = async () => {
   router.push('/login')
 }
 
-const menus = ref([
-  {
-    title: 'Dashboard',
-    icon: mdiHome,
-    to: { name: 'dashboard' }
-  },
-  {
-    title: 'Status',
-    icon: mdiAccountTag,
-    to: { name: 'status-list' }
-  },
-  {
-    title: 'Specialty',
-    icon: mdiGroup,
-    to: { name: 'specialty-list' }
-  },
-  {
-    title: 'Patient',
-    icon: mdiPacMan,
-    to: { name: 'patient-list' }
-  }
-])
-
 // Load user data on mount
 onMounted(() => {
-  if (authStore.user) {
-    userEmail.value = authStore.user.email || 'usuario@exemplo.com'
-    userName.value =
-      authStore.user.name ||
-      authStore.user.username ||
-      (authStore.user.email ? authStore.user.email.split('@')[0] : 'Usuário')
+  // This ensures user data is up to date with what's in the store
+  if (authStore.isAuthenticated) {
+    // Optional: validate token or refresh user data
+    authStore.validateToken()
   }
 })
 </script>
@@ -79,7 +109,7 @@ onMounted(() => {
       <v-app-bar-title>
         <div class="d-flex align-center">
           <img src="@/assets/logo.svg" alt="ClinAgenda" height="32" class="me-2" />
-          <span class="font-weightconst-bold">ClinAgenda</span>
+          <span class="font-weight-bold">ClinAgenda</span>
         </div>
       </v-app-bar-title>
 
@@ -93,6 +123,13 @@ onMounted(() => {
             </v-btn>
           </template>
           <v-list>
+            <v-list-item>
+              <v-list-item-title>
+                <div class="font-weight-bold">{{ userName }}</div>
+                <div class="text-caption">{{ userEmail }}</div>
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider></v-divider>
             <v-list-item>
               <v-list-item-title>Perfil</v-list-item-title>
             </v-list-item>
@@ -111,11 +148,11 @@ onMounted(() => {
     <!-- Navigation Drawer -->
     <v-navigation-drawer v-model="drawer" temporary>
       <v-list>
-        <v-list-item
-          prepend-avatar="@/assets/logo.svg"
-          :title="userName"
-          :subtitle="userEmail"
-        ></v-list-item>
+        <v-list-item prepend-avatar="@/assets/logo.svg" :title="userName" :subtitle="userEmail">
+          <template v-if="authStore.isAdmin" #append>
+            <v-chip color="primary" size="small">Admin</v-chip>
+          </template>
+        </v-list-item>
       </v-list>
 
       <v-divider></v-divider>
@@ -132,13 +169,35 @@ onMounted(() => {
       </v-list>
     </v-navigation-drawer>
 
-    <router-view></router-view>
+    <!-- Main Content -->
+    <v-main>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12">
+            <!-- Page Header -->
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div>
+                <h1 class="text-h4">
+                  <slot name="title">ClinAgenda</slot>
+                </h1>
+              </div>
+              <div>
+                <slot name="action"></slot>
+              </div>
+            </div>
+
+            <!-- Page Content -->
+            <slot></slot>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
 
     <!-- Footer -->
     <v-footer app class="text-center d-flex flex-column">
       <div>
-        <small
-          >&copy; {{ new Date().getFullYear() }} ClinAgenda - Sistema para Controle de Pacientes e
+        <small>
+          &copy; {{ new Date().getFullYear() }} ClinAgenda - Sistema para Controle de Pacientes e
           Recpeção - Desenvolvido por Diego Furukawa inc.
         </small>
       </div>
@@ -156,10 +215,9 @@ $standard-easing: cubic-bezier(0.4, 0, 0.2, 1);
 $transition-fast: 0.15s $standard-easing;
 
 // Classes específicas deste componente
-.font-weightconst-bold {
+.font-weight-bold {
   font-weight: 600;
 }
 
 // Você pode incluir outras classes específicas conforme necessário...
 </style>
-
