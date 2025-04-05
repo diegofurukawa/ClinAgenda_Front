@@ -1,10 +1,6 @@
 export interface IStatus {
-  statusId: number
-  statusName: string
-  statusType: string
-  dCreated: string
-  dLastUpdated: string
-  lActive: boolean
+  id: number
+  name: string
 }
 
 export type GetStatusListRequest = {
@@ -17,3 +13,6 @@ export type GetStatusListResponse = {
   items: IStatus[]
 }
 
+export type StatusForm = {
+  name: IStatus['name']
+}

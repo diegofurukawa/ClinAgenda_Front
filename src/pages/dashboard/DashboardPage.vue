@@ -958,4 +958,3 @@ import { DefaultTemplate } from '@/template'
   width: 100%;
 }
 </style>
-

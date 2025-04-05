@@ -1,9 +1,14 @@
 .
 ├── components.d.ts
+├── enum
+│   ├── index.ts
+│   └── pageMode.ts
 ├── env.d.ts
 ├── eslint.config.js
 ├── index.html
 ├── package.json
+├── public
+│   └── logo.png
 ├── README.md
 ├── scripts
 │   └── search.sh
@@ -21,6 +26,10 @@
 │   │   ├── mock.ts
 │   │   └── vuetify.ts
 │   ├── interfaces
+│   │   ├── doctor.ts
+│   │   ├── index.ts
+│   │   ├── patient.ts
+│   │   ├── specialty.ts
 │   │   └── status.ts
 │   ├── main.ts
 │   ├── pages
@@ -28,6 +37,15 @@
 │   │   │   └── LoginPage.vue
 │   │   ├── dashboard
 │   │   │   └── DashboardPage.vue
+│   │   ├── doctor
+│   │   │   ├── DoctorFormPage.vue
+│   │   │   └── DoctorListPage.vue
+│   │   ├── patient
+│   │   │   ├── PatientFormPage.vue
+│   │   │   └── PatientListPage.vue
+│   │   ├── specialty
+│   │   │   ├── SpecialtyFormPage.vue
+│   │   │   └── SpecialtyListPage.vue
 │   │   └── status
 │   │   ├── index.ts
 │   │   ├── StatusFormPage.vue
@@ -38,15 +56,14 @@
 │   ├── stores
 │   │   ├── auth.ts
 │   │   ├── index.ts
-│   │   ├── status.ts
 │   │   └── toast.ts
 │   ├── styles
 │   │   ├── README.md
-│   │   └── settings.scss
+│   │   ├── settings.scss
+│   │   └── styles.ts
 │   ├── template
 │   │   ├── DefaultTemplate.vue
-│   │   ├── index.ts
-│   │   └── ModelTemplate.vue
+│   │   └── index.ts
 │   └── utils
 │   ├── dateFormat.ts
 │   ├── index.ts
@@ -59,4 +76,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-15 directories, 44 files
+20 directories, 56 files

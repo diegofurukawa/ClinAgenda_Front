@@ -1,18 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
-import { mdiPlusCircle, mdiTrashCan } from '@mdi/js'
+import { mdiPlusCircle, mdiSquareEditOutline, mdiTrashCan } from '@mdi/js'
 import type { IPatient, GetPatientListRequest, GetPatientListResponse } from '@/interfaces/patient'
+import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
+import { vMaska } from 'maska/vue'
+import {
+  clearMask,
+  dateFormat,
+  DateFormatEnum,
+  documentNumberMask,
+  maskDocumentNumber,
+  maskPhoneNumber
+} from '@/utils'
 
 const toastStore = useToastStore()
 
 const isLoadingList = ref<boolean>(false)
+const isLoadingFilter = ref<boolean>(false)
+
+const filterName = ref<GetPatientListRequest['name']>('')
+const filterDocumentNumber = ref<GetPatientListRequest['documentNumber']>('')
+  //documentNumber: clearMask(filterDocumentNumber.value),
+const filterStatusId = ref<IStatus['id'] | null>(null)
+
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<IPatient[]>([])
+const statusItems = ref<IStatus[]>([])
 
 const headers = [
   {
@@ -23,10 +41,10 @@ const headers = [
     cellProps: { class: 'text-no-wrap' }
   },
   { title: 'Nome', key: 'name', sortable: false },
-  { title: 'Duração', key: 'phoneNumber', sortable: false },
-  { title: 'Documento', key: 'documentNumber', sortable: false },
-  { title: 'Status', key: 'statusId', sortable: false },
-  { title: 'Nascimento', key: 'birthDate', sortable: false },
+  { title: 'CPF', key: 'documentNumber', sortable: false },
+  { title: 'Telefone', key: 'phoneNumber', sortable: false },
+  { title: 'Data Nascimento', key: 'birthDate', sortable: false },
+  { title: 'Status', key: 'status', sortable: false },
   {
     title: 'Ações',
     key: 'actions',
@@ -43,21 +61,47 @@ const handleDataTableUpdate = async ({ page: tablePage, itemsPerPage: tableItems
 }
 
 const loadDataTable = async () => {
-  isLoadingList.value = true
-  const { isError, data } = await request<GetPatientListRequest, GetPatientListResponse>({
-    method: 'GET',
-    endpoint: 'patient/list',
-    body: {
-      itemsPerPage: itemsPerPage.value,
-      page: page.value
-    }
-  })
+  try {
+    isLoadingList.value = true
+    const { isError, data } = await request<GetPatientListRequest, GetPatientListResponse>({
+      method: 'GET',
+      endpoint: 'patient/list',
+      body: {
+        itemsPerPage: itemsPerPage.value,
+        page: page.value,
+        name: filterName.value,
+        documentNumber: clearMask(filterDocumentNumber.value),
+        statusId: filterStatusId.value
+      }
+    })
 
-  if (isError) return
+    if (isError) return
 
-  items.value = data.items
-  total.value = data.total
-  isLoadingList.value = false
+    items.value = data.items
+    total.value = data.total
+    isLoadingList.value = false
+  } catch (e) {
+    console.error('Erro ao buscar item da lista', e)
+  }
+}
+
+const loadFilters = async () => {
+  isLoadingFilter.value = true
+
+  try {
+    const statusResponse = await request<undefined, GetStatusListResponse>({
+      method: 'GET',
+      endpoint: 'status/list'
+    })
+
+    if (statusResponse.isError) return
+
+    statusItems.value = statusResponse.data.items
+  } catch (e) {
+    console.error('Erro ao buscar items do filtro', e)
+  }
+
+  isLoadingFilter.value = false
 }
 
 const deleteListItem = async (item: IPatient) => {
@@ -68,14 +112,14 @@ const deleteListItem = async (item: IPatient) => {
   try {
     const response = await request<null, null>({
       method: 'DELETE',
-      endpoint: `patient/delete/${item.id}`
+      endpoint: `patient/${item.id}`
     })
 
     if (response.isError) return
 
     toastStore.setToast({
       type: 'success',
-      text: 'patient deletada com sucesso!'
+      text: 'Paciente deletado com sucesso!'
     })
 
     loadDataTable()
@@ -83,19 +127,55 @@ const deleteListItem = async (item: IPatient) => {
     console.error('Falha ao deletar item da lista', e)
   }
 }
+
+onMounted(() => {
+  loadFilters()
+})
 </script>
 
 <template>
-  <default-template>
-    <template #title> Lista de patient </template>
+  <DefaultTemplate>
+    <template #title> Lista de pacientes </template>
 
     <template #action>
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" :to="{ name: 'patient-insert' }">
-        Adicionar patient
+        Adicionar paciente
       </v-btn>
     </template>
 
     <template #default>
+      <v-sheet class="pa-4 mb-4">
+        <v-form @submit.prevent="loadDataTable">
+          <v-row>
+            <v-col>
+              <v-text-field v-model.trim="filterName" label="Nome" hide-details />
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model.trim="filterDocumentNumber"
+                v-maska="documentNumberMask"
+                label="CPF"
+                hide-details
+              />
+            </v-col>
+            <v-col>
+              <v-select
+                v-model="filterStatusId"
+                label="Status"
+                :loading="isLoadingFilter"
+                :items="statusItems"
+                item-value="id"
+                item-title="name"
+                clearable
+                hide-details
+              />
+            </v-col>
+            <v-col cols="auto" class="d-flex align-center">
+              <v-btn color="primary" type="submit">Filtrar</v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-sheet>
       <v-data-table-server
         v-model:items-per-page="itemsPerPage"
         :headers="headers"
@@ -105,8 +185,38 @@ const deleteListItem = async (item: IPatient) => {
         item-value="id"
         @update:options="handleDataTableUpdate"
       >
+        <template #[`item.status`]="{ item }">
+          <v-chip>
+            {{ item.status.name }}
+          </v-chip>
+        </template>
+        <template #[`item.documentNumber`]="{ item }">
+          <div>{{ maskDocumentNumber(item.documentNumber) }}</div>
+        </template>
+        <template #[`item.phoneNumber`]="{ item }">
+          <div>{{ maskPhoneNumber(item.phoneNumber) }}</div>
+        </template>
+        <template #[`item.birthDate`]="{ item }">
+          <div>{{ dateFormat(item.birthDate, DateFormatEnum.FullDate.value) }}</div>
+        </template>
         <template #[`item.actions`]="{ item }">
-          <v-tooltip text="Deletar patient" location="left">
+
+          <v-tooltip text="Editar paciente" location="left">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                :icon="mdiSquareEditOutline"
+                size="small"
+                color="primary"
+                :to="{ name: 'patient-update', params: { id: item.id } }"
+              />
+
+            </template>
+          </v-tooltip>
+
+
+
+          <v-tooltip text="Deletar paciente" location="left">
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -118,8 +228,10 @@ const deleteListItem = async (item: IPatient) => {
               />
             </template>
           </v-tooltip>
+
+
         </template>
       </v-data-table-server>
     </template>
-  </default-template>
+  </DefaultTemplate>
 </template>
