@@ -2,17 +2,13 @@
 import { ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiPlusCircle, mdiTrashCan } from '@mdi/js'
-import type {
-  IDoctor,
-  GetDoctorListRequest,
-  GetDoctorListResponse
-} from '@/interfaces/doctor'
+import type { IDoctor, GetDoctorListRequest, GetDoctorListResponse } from '@/interfaces/doctor'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
 
 const toastStore = useToastStore()
 const isLoadingList = ref<boolean>(false)
-const filterName = ref<GetDoctorListRequest['name']>('')
+const filterName = ref<GetDoctorListRequest['doctorName']>('')
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
@@ -21,17 +17,17 @@ const items = ref<IDoctor[]>([])
 const headers = [
   {
     title: 'ID',
-    key: 'id',
+    key: 'doctorId',
     sortable: false,
     width: 0,
     cellProps: { class: 'text-no-wrap' }
   },
-  { title: 'Nome', key: 'name', sortable: false },
-  
+  { title: 'Nome', key: 'doctorName', sortable: false },
+
   { title: 'Especialidade', key: 'specialtyName', sortable: false },
   { title: 'Duração', key: 'ScheduleDuration', sortable: false },
   { title: 'Status', key: 'statusName', sortable: false },
-  
+
   {
     title: 'Ações',
     key: 'actions',
@@ -67,13 +63,13 @@ const loadDataTable = async () => {
 }
 
 const deleteListItem = async (item: IDoctor) => {
-  const shouldDelete = confirm(`Deseja mesmo deletar ${item.name}?`)
+  const shouldDelete = confirm(`Deseja mesmo deletar ${item.doctorName}?`)
 
   if (!shouldDelete) return
 
   const response = await request<null, null>({
     method: 'DELETE',
-    endpoint: `doctor/delete/${item.id}`
+    endpoint: `doctor/delete/${item.doctorId}`
   })
 
   if (response.isError) return
@@ -120,10 +116,11 @@ const deleteListItem = async (item: IDoctor) => {
         item-value="id"
         @update:options="handleDataTableUpdate"
       >
-        
-        <template #[`item.specialtyName`]="{ item }"> {{ item.specialty.name }} </template>
-        <template #[`item.ScheduleDuration`]="{ item }"> {{ item.specialty.scheduleDuration }} </template>
-        <template #[`item.statusName`]="{ item }"> {{ item.status.name }} </template>
+        <template #[`item.specialtyName`]="{ item }"> {{ item.specialty.doctorName }} </template>
+        <template #[`item.ScheduleDuration`]="{ item }">
+          {{ item.specialty.scheduleDuration }}
+        </template>
+        <template #[`item.statusName`]="{ item }"> {{ item.status.statusName }} </template>
 
         <template #[`item.actions`]="{ item }">
           <v-tooltip text="Deletar Médico" location="left">
@@ -143,3 +140,4 @@ const deleteListItem = async (item: IDoctor) => {
     </template>
   </default-template>
 </template>
+

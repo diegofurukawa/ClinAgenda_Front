@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-// import { DefaultTemplate } from '@/template'
+import { DefaultTemplate } from '@/template'
 import { mdiPlusCircle, mdiSquareEditOutline, mdiTrashCan } from '@mdi/js'
 import type { IPatient, GetPatientListRequest, GetPatientListResponse } from '@/interfaces/patient'
 import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
@@ -23,8 +23,7 @@ const isLoadingFilter = ref<boolean>(false)
 
 const filterName = ref<GetPatientListRequest['name']>('')
 const filterDocumentNumber = ref<GetPatientListRequest['documentNumber']>('')
-//documentNumber: clearMask(filterDocumentNumber.value),
-const filterStatusId = ref<IStatus['id'] | null>(null)
+const filterStatusId = ref<IStatus['statusId'] | null>(null)
 
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
@@ -35,12 +34,12 @@ const statusItems = ref<IStatus[]>([])
 const headers = [
   {
     title: 'ID',
-    key: 'id',
+    key: 'patientId',
     sortable: false,
     width: 0,
     cellProps: { class: 'text-no-wrap' }
   },
-  { title: 'Nome', key: 'name', sortable: false },
+  { title: 'Nome', key: 'patientName', sortable: false },
   { title: 'CPF', key: 'documentNumber', sortable: false },
   { title: 'Telefone', key: 'phoneNumber', sortable: false },
   { title: 'Data Nascimento', key: 'birthDate', sortable: false },
@@ -105,14 +104,14 @@ const loadFilters = async () => {
 }
 
 const deleteListItem = async (item: IPatient) => {
-  const shouldDelete = confirm(`Deseja mesmo deletar ${item.name}?`)
+  const shouldDelete = confirm(`Deseja mesmo deletar ${item.patientName}?`)
 
   if (!shouldDelete) return
 
   try {
     const response = await request<null, null>({
       method: 'DELETE',
-      endpoint: `patient/${item.id}`
+      endpoint: `patient/${item.patientId}`
     })
 
     if (response.isError) return
@@ -164,8 +163,8 @@ onMounted(() => {
                 label="Status"
                 :loading="isLoadingFilter"
                 :items="statusItems"
-                item-value="id"
-                item-title="name"
+                item-value="statusId"
+                item-title="statusName"
                 clearable
                 hide-details
               />
@@ -187,7 +186,7 @@ onMounted(() => {
       >
         <template #[`item.status`]="{ item }">
           <v-chip>
-            {{ item.status.name }}
+            {{ item.status.statusName }}
           </v-chip>
         </template>
         <template #[`item.documentNumber`]="{ item }">
@@ -200,18 +199,6 @@ onMounted(() => {
           <div>{{ dateFormat(item.birthDate, DateFormatEnum.FullDate.value) }}</div>
         </template>
         <template #[`item.actions`]="{ item }">
-          <v-tooltip text="Editar paciente" location="left">
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                :icon="mdiSquareEditOutline"
-                size="small"
-                color="primary"
-                :to="{ name: 'patient-update', params: { id: item.id } }"
-              />
-            </template>
-          </v-tooltip>
-
           <v-tooltip text="Deletar paciente" location="left">
             <template #activator="{ props }">
               <v-btn
@@ -221,6 +208,17 @@ onMounted(() => {
                 color="error"
                 class="mr-2"
                 @click="deleteListItem(item)"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip text="Editar paciente" location="left">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                :icon="mdiSquareEditOutline"
+                size="small"
+                color="primary"
+                :to="{ name: 'patient-update', params: { id: item.patientId } }"
               />
             </template>
           </v-tooltip>

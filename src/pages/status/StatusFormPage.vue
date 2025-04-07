@@ -2,12 +2,17 @@
 import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
-import type { StatusForm } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
+
+import type { StatusForm, IStatusType, GetStatusTypeListResponse } from '@/interfaces/status'
+
+const filterStatusType = ref<IStatusType['statusType'] | null>(null)
+const isLoadingFilter = ref<boolean>(false)
+const statusTypeItems = ref<IStatusType[]>([])
 
 const toastStore = useToastStore()
 const route = useRoute()
@@ -17,8 +22,28 @@ const isLoadingForm = ref<boolean>(false)
 const id = route.params.id
 const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
+const loadFilters = async () => {
+  isLoadingFilter.value = true
+
+  try {
+    const statusTypeResponse = await request<undefined, GetStatusTypeListResponse>({
+      method: 'GET',
+      endpoint: 'status/types'
+    })
+
+    if (statusTypeResponse.isError) return
+
+    statusTypeItems.value = statusTypeResponse.data.items
+  } catch (e) {
+    console.error('Erro ao buscar items do filtro', e)
+  }
+
+  isLoadingFilter.value = false
+}
+
 const form = ref<StatusForm>({
-  name: ''
+  statusName: '',
+  statusType: ''
 })
 
 const pageTitle = computed(() => {
@@ -41,7 +66,6 @@ const submitForm = async () => {
   })
 
   router.push({ name: 'status-list' })
-
   isLoadingForm.value = false
 }
 
@@ -62,6 +86,7 @@ const loadForm = async () => {
 
 onMounted(() => {
   loadForm()
+  loadFilters()
 })
 </script>
 
@@ -72,7 +97,10 @@ onMounted(() => {
     </template>
 
     <template #action>
+      <!-- Botão Cancelar -->
       <v-btn :prepend-icon="mdiCancel" :to="{ name: 'status-list' }"> Cancelar </v-btn>
+
+      <!-- Botão Salvar -->
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" @click.prevent="submitForm">
         Salvar
       </v-btn>
@@ -81,9 +109,25 @@ onMounted(() => {
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
         <v-col cols="6">
-          <v-text-field v-model.trim="form.name" label="Nome" hide-details />
+          <v-text-field v-model.trim="form.statusName" label="Nome Status" hide-details />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="6">
+          <v-select
+            v-model="filterStatusType"
+            label="Tipo Status"
+            :loading="isLoadingFilter"
+            :items="statusTypeItems"
+            item-value="statusId"
+            item-title="statusName"
+            clearable
+            hide-details
+          />
         </v-col>
       </v-row>
     </v-form>
   </default-template>
 </template>
+

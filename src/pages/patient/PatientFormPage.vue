@@ -11,16 +11,15 @@ import router from '@/router'
 import { vMaska } from 'maska/vue'
 import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import {
-//   clearMask,
-//   dateFormat,
-//   DateFormatEnum,
-    dateMask,
-    documentNumberMask,
-    phoneNumberMask
+  //   clearMask,
+  //   dateFormat,
+  //   DateFormatEnum,
+  dateMask,
+  documentNumberMask,
+  phoneNumberMask
 } from '@/utils'
 
-
-const filterStatusId = ref<IStatus['id'] | null>(null)
+const filterStatusId = ref<IStatus['statusId'] | null>(null)
 const isLoadingFilter = ref<boolean>(false)
 const statusItems = ref<IStatus[]>([])
 
@@ -31,7 +30,6 @@ const isLoadingForm = ref<boolean>(false)
 
 const id = route.params.id
 const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
-
 
 const loadFilters = async () => {
   isLoadingFilter.value = true
@@ -57,11 +55,12 @@ onMounted(() => {
 })
 
 const form = ref<PatientForm>({
-  name: ''
-  ,phoneNumber: ''
-  ,documentNumber: ''
-  ,birthDate: ''
-  ,statusId: 13
+  patientName: '',
+  phoneNumber: '',
+  documentNumber: '',
+  birthDate: '',
+  statusId: 13,
+  lActive: true
 })
 
 const pageTitle = computed(() => {
@@ -124,50 +123,53 @@ onMounted(() => {
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model.trim="form.name" label="Nome" hide-details />
+          <v-text-field v-model.trim="form.patientName" label="Nome" hide-details />
         </v-col>
-    </v-row>
+      </v-row>
 
-
-    <v-row>
+      <v-row>
         <v-col cols="4">
-          <v-text-field 
-          v-model.trim="form.phoneNumber"
-          v-maska="phoneNumberMask"
-          label="Telefone" 
-          hide-details />
+          <v-text-field
+            v-model.trim="form.phoneNumber"
+            v-maska="phoneNumberMask"
+            label="Telefone"
+            hide-details
+          />
         </v-col>
 
         <v-col cols="4">
-          <v-text-field 
+          <v-text-field
             v-model.trim="form.documentNumber"
             v-maska="documentNumberMask"
-            label="Documento" 
-            hide-details />
+            label="Documento"
+            hide-details
+          />
         </v-col>
-    </v-row>
-    <v-row>
+      </v-row>
+      <v-row>
         <v-col cols="4">
-          <v-text-field 
-            v-model.trim="form.birthDate" 
+          <v-text-field
+            v-model.trim="form.birthDate"
             v-maska="dateMask"
-            label="Nascimento" 
-            hide-details />
+            label="Nascimento"
+            hide-details
+          />
         </v-col>
 
         <v-col cols="4">
-            <v-select
-                v-model="filterStatusId"
-                label="Status"
-                :loading="isLoadingFilter"
-                :items="statusItems"
-                item-value="id"
-                item-title="name"
-                clearable
-                hide-details
-              />
+          <v-select
+            v-model="filterStatusId"
+            label="Status"
+            :loading="isLoadingFilter"
+            :items="statusItems"
+            item-value="statusId"
+            item-title="statusName"
+            clearable
+            hide-details
+          />
         </v-col>
-    </v-row>
+      </v-row>
     </v-form>
   </default-template>
 </template>
+

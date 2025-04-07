@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiPlusCircle, mdiTrashCan } from '@mdi/js'
-import type { IStatus, GetStatusListRequest, GetStatusListResponse } from '@/interfaces/status'
+import type {
+  IStatus,
+  IStatusType,
+  GetStatusListRequest,
+  GetStatusListResponse,
+  GetStatusTypeListResponse
+} from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
 import router from '@/router'
@@ -10,20 +16,27 @@ import router from '@/router'
 const toastStore = useToastStore()
 
 const isLoadingList = ref<boolean>(false)
+const isLoadingFilter = ref<boolean>(false)
+
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
+// const items = ref<IStatus[]>([])
 const items = ref<IStatus[]>([])
+
+const statusTypeItems = ref<IStatusType[]>([])
 
 const headers = [
   {
-    title: 'ID',
-    key: 'id',
+    title: 'StatusId',
+    key: 'statusId',
     sortable: false,
     width: 0,
     cellProps: { class: 'text-no-wrap' }
   },
-  { title: 'Nome', key: 'name', sortable: false },
+  { title: 'Nome', key: 'statusName', sortable: false },
+  { title: 'Tipo', key: 'statusType', sortable: false },
+  { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
     key: 'actions',
@@ -57,15 +70,34 @@ const loadDataTable = async () => {
   isLoadingList.value = false
 }
 
+const loadFilters = async () => {
+  isLoadingFilter.value = true
+
+  try {
+    const statusTypeResponse = await request<undefined, GetStatusTypeListResponse>({
+      method: 'GET',
+      endpoint: 'status/types'
+    })
+
+    if (statusTypeResponse.isError) return
+
+    statusTypeItems.value = statusTypeResponse.data.items
+  } catch (e) {
+    console.error('Erro ao buscar items do filtro', e)
+  }
+
+  isLoadingFilter.value = false
+}
+
 const deleteListItem = async (item: IStatus) => {
-  const shouldDelete = confirm(`Deseja mesmo deletar ${item.name}?`)
+  const shouldDelete = confirm(`Deseja mesmo deletar ${item.statusName}?`)
 
   if (!shouldDelete) return
 
   try {
     const response = await request<null, null>({
       method: 'DELETE',
-      endpoint: `status/delete/${item.id}`
+      endpoint: `status/delete/${item.statusId}`
     })
 
     if (response.isError) return
@@ -82,6 +114,10 @@ const deleteListItem = async (item: IStatus) => {
     console.error('Falha ao deletar item da lista', e)
   }
 }
+
+onMounted(() => {
+  loadFilters()
+})
 </script>
 
 <template>
@@ -95,6 +131,31 @@ const deleteListItem = async (item: IStatus) => {
     </template>
 
     <template #default>
+      <!-- Filtros da Lista -->
+      <v-sheet class="pa-4 mb-4">
+        <v-form @submit.prevent="loadDataTable">
+          <v-row>
+            <!-- Filtro de Tipo Status -->
+            <v-col>
+              <v-select
+                v-model="filterStatusType"
+                label="Tipo"
+                :loading="isLoadingFilter"
+                :items="statusTypeItems"
+                item-value="statusType"
+                item-title="statusType"
+                clearable
+                hide-details
+              />
+            </v-col>
+
+            <v-col cols="auto" class="d-flex align-center">
+              <v-btn color="primary" type="submit">Filtrar</v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-sheet>
+
       <v-data-table-server
         v-model:items-per-page="itemsPerPage"
         :headers="headers"

@@ -11,19 +11,17 @@ import router from '@/router'
 
 const toastStore = useToastStore()
 const route = useRoute()
-
 const isLoadingForm = ref<boolean>(false)
-
 const id = route.params.id
 const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<SpecialtyForm>({
-  name: ''
-  ,scheduleDuration: 0
+  specialtyName: '',
+  nScheduleDuration: 0
 })
 
 const pageTitle = computed(() => {
-  return pageMode === PageMode.PAGE_UPDATE ? 'Editar specialty' : 'Cadastrar novo specialty'
+  return pageMode === PageMode.PAGE_UPDATE ? 'Editar especialidade' : 'Cadastrar nova especialidade'
 })
 
 const submitForm = async () => {
@@ -50,6 +48,7 @@ const loadForm = async () => {
   if (pageMode === PageMode.PAGE_INSERT) return
 
   isLoadingForm.value = true
+
   const specialtyFormResponse = await request<undefined, SpecialtyForm>({
     method: 'GET',
     endpoint: `specialty/update/${id}`
@@ -67,7 +66,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title>
       {{ pageTitle }}
     </template>
@@ -81,14 +80,14 @@ onMounted(() => {
 
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
-        <v-col cols="8">
-          <v-text-field v-model.trim="form.name" label="Nome" hide-details />
+        <v-col cols="6">
+          <v-text-field v-model.trim="form.specialtyName" label="Especialidade" hide-details />
         </v-col>
-
         <v-col cols="2">
-          <v-text-field v-model.trim="form.scheduleDuration" label="Duração" hide-details />
+          <v-text-field v-model.trim="form.nScheduleDuration" label="Duração" hide-details />
         </v-col>
       </v-row>
     </v-form>
-  </default-template>
+  </DefaultTemplate>
 </template>
+
