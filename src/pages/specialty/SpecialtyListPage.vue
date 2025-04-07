@@ -99,7 +99,7 @@ const deleteListItem = async (item: ISpecialty) => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title> Lista de especialidades </template>
 
     <template #action>
@@ -150,6 +150,6 @@ const deleteListItem = async (item: ISpecialty) => {
         </template>
       </v-data-table-server>
     </template>
-  </default-template>
+  </DefaultTemplate>
 </template>
 

@@ -4,7 +4,7 @@ import { routes } from '@/router/auth/Routes'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
 import { h } from 'vue'
-import DefaultTemplate from '@/template/DefaultTemplate.vue'
+import { DefaultTemplate } from '@/template'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -43,6 +43,7 @@ router.beforeResolve((to, from, next) => {
 })
 
 // Global navigation guard
+// router.beforeEach(async (to, from) => {
 router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const toastStore = useToastStore()

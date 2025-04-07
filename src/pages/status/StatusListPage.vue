@@ -121,7 +121,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title> Lista de Status </template>
 
     <template #action>
@@ -181,6 +181,6 @@ onMounted(() => {
         </template>
       </v-data-table-server>
     </template>
-  </default-template>
+  </DefaultTemplate>
 </template>
 

@@ -91,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title>
       {{ pageTitle }}
     </template>
@@ -128,6 +128,6 @@ onMounted(() => {
         </v-col>
       </v-row>
     </v-form>
-  </default-template>
+  </DefaultTemplate>
 </template>
 

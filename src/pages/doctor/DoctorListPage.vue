@@ -84,7 +84,7 @@ const deleteListItem = async (item: IDoctor) => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title> Lista de Médicos </template>
 
     <template #action>
@@ -138,6 +138,6 @@ const deleteListItem = async (item: IDoctor) => {
         </template>
       </v-data-table-server>
     </template>
-  </default-template>
+  </DefaultTemplate>
 </template>
 

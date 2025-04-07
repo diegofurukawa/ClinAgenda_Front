@@ -18,9 +18,9 @@ const id = route.params.id
 const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<DoctorForm>({
-  name: ''
-  ,specialtyId: ''
-  ,statusId: ''
+  name: '',
+  specialtyId: '',
+  statusId: ''
 })
 
 const pageTitle = computed(() => {
@@ -68,7 +68,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <default-template>
+  <DefaultTemplate>
     <template #title>
       {{ pageTitle }}
     </template>
@@ -93,8 +93,8 @@ onMounted(() => {
         <v-col cols="6">
           <v-text-field v-model.trim="form.statusId" label="Status" hide-details />
         </v-col>
-
       </v-row>
     </v-form>
-  </default-template>
+  </DefaultTemplate>
 </template>
+
