@@ -21,7 +21,7 @@ const toastStore = useToastStore()
 const isLoadingList = ref<boolean>(false)
 const isLoadingFilter = ref<boolean>(false)
 
-const filterName = ref<GetPatientListRequest['name']>('')
+const filterName = ref<GetPatientListRequest['patientName']>('')
 const filterDocumentNumber = ref<GetPatientListRequest['documentNumber']>('')
 const filterStatusId = ref<IStatus['statusId'] | null>(null)
 
@@ -29,7 +29,6 @@ const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<IPatient[]>([])
-const statusItems = ref<IStatus[]>([])
 
 const headers = [
   {
@@ -42,7 +41,7 @@ const headers = [
   { title: 'Nome', key: 'patientName', sortable: false },
   { title: 'CPF', key: 'documentNumber', sortable: false },
   { title: 'Telefone', key: 'phoneNumber', sortable: false },
-  { title: 'Data Nascimento', key: 'birthDate', sortable: false },
+  { title: 'Data Nascimento', key: 'dBirthDate', sortable: false },
   { title: 'Status', key: 'status', sortable: false },
   {
     title: 'Ações',
@@ -68,7 +67,7 @@ const loadDataTable = async () => {
       body: {
         itemsPerPage: itemsPerPage.value,
         page: page.value,
-        name: filterName.value,
+        patientName: filterName.value,
         documentNumber: clearMask(filterDocumentNumber.value),
         statusId: filterStatusId.value
       }
@@ -83,6 +82,10 @@ const loadDataTable = async () => {
     console.error('Erro ao buscar item da lista', e)
   }
 }
+// =================================================================
+// COMENTA
+// =================================================================
+const statusItems = ref<IStatus[]>([])
 
 const loadFilters = async () => {
   isLoadingFilter.value = true
@@ -195,9 +198,10 @@ onMounted(() => {
         <template #[`item.phoneNumber`]="{ item }">
           <div>{{ maskPhoneNumber(item.phoneNumber) }}</div>
         </template>
-        <template #[`item.birthDate`]="{ item }">
-          <div>{{ dateFormat(item.birthDate, DateFormatEnum.FullDate.value) }}</div>
+        <template #[`item.dBirthDate`]="{ item }">
+          <div>{{ dateFormat(item.dBirthDate, DateFormatEnum.FullDate.value) }}</div>
         </template>
+
         <template #[`item.actions`]="{ item }">
           <v-tooltip text="Deletar paciente" location="left">
             <template #activator="{ props }">

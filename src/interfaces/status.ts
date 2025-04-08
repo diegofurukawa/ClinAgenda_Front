@@ -9,12 +9,13 @@ export interface IStatus {
 
 export interface IStatusType {
   statusType: string
+  statusTypeName: string
 }
 
 export type GetStatusListRequest = {
   itemsPerPage: number
   page: number
-  name: IStatus['statusName']
+  statusName: IStatus['statusName']
 }
 
 export type GetStatusListResponse = {
@@ -24,7 +25,7 @@ export type GetStatusListResponse = {
 
 export type GetStatusTypeListResponse = {
   total: number
-  items: IStatus[]
+  items: IStatusType[]
 }
 
 export type StatusForm = {

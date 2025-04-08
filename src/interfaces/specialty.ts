@@ -10,7 +10,7 @@ export interface ISpecialty {
 export type GetSpecialtyListRequest = {
   itemsPerPage: number
   page: number
-  name: ISpecialty['specialtyName']
+  specialtyName?: ISpecialty['specialtyName']
 }
 
 export type GetSpecialtyListResponse = {

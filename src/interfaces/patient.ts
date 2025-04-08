@@ -5,14 +5,14 @@ export interface IPatient {
   patientName: string
   phoneNumber: string
   documentNumber: string
-  birthDate: string
+  dBirthDate: string
   status: IStatus
 }
 
 export type GetPatientListRequest = {
   itemsPerPage: number
   page: number
-  name: IPatient['patientName']
+  patientName: IPatient['patientName']
   documentNumber: IPatient['documentNumber']
   statusId: IStatus['statusId'] | null
 }
@@ -26,7 +26,7 @@ export type PatientForm = {
   patientName: IPatient['patientName']
   phoneNumber: IPatient['phoneNumber']
   documentNumber: IPatient['documentNumber']
-  birthDate: IPatient['birthDate']
+  dBirthDate: IPatient['dBirthDate']
   statusId: IStatus['statusId'] | null
   lActive: boolean
 }

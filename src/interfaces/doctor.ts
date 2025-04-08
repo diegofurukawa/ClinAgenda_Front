@@ -11,27 +11,10 @@ export interface IDoctor {
 export type GetDoctorListRequest = {
   itemsPerPage: number
   page: number
-  name: IDoctor['doctorName']
+  doctorName: IDoctor['doctorName']
 }
 
 export type GetDoctorListResponse = {
   total: number
   items: IDoctor[]
 }
-
-// {
-//   "id": 1,
-//   "name": "DIEGO",
-//   "specialty": [
-//     {
-//       "id": 4,
-//       "name": "ORTOPEDIA",
-//       "scheduleDuration": 0
-//     }
-//   ],
-//   "status": {
-//     "id": 1,
-//     "name": "ATIVO"
-//   }
-// }
-

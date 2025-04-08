@@ -3,25 +3,21 @@ import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
 import type { PatientForm } from '@/interfaces/patient'
+import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
 import { vMaska } from 'maska/vue'
-import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import {
-  //   clearMask,
-  //   dateFormat,
-  //   DateFormatEnum,
+  clearMask,
+  dateFormat,
+  DateFormatEnum,
   dateMask,
   documentNumberMask,
   phoneNumberMask
 } from '@/utils'
-
-const filterStatusId = ref<IStatus['statusId'] | null>(null)
-const isLoadingFilter = ref<boolean>(false)
-const statusItems = ref<IStatus[]>([])
 
 const toastStore = useToastStore()
 const route = useRoute()
@@ -31,74 +27,80 @@ const isLoadingForm = ref<boolean>(false)
 const id = route.params.id
 const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
-const loadFilters = async () => {
-  isLoadingFilter.value = true
-
-  try {
-    const statusResponse = await request<undefined, GetStatusListResponse>({
-      method: 'GET',
-      endpoint: 'status/list'
-    })
-
-    if (statusResponse.isError) return
-
-    statusItems.value = statusResponse.data.items
-  } catch (e) {
-    console.error('Erro ao buscar items do filtro', e)
-  }
-
-  isLoadingFilter.value = false
-}
-
-onMounted(() => {
-  loadFilters()
-})
-
 const form = ref<PatientForm>({
   patientName: '',
-  phoneNumber: '',
   documentNumber: '',
-  birthDate: '',
-  statusId: 13,
+  phoneNumber: '',
+  dBirthDate: '',
+  statusId: null,
   lActive: true
 })
+const statusItems = ref<IStatus[]>([])
 
 const pageTitle = computed(() => {
-  return pageMode === PageMode.PAGE_UPDATE ? 'Editar patient' : 'Cadastrar novo patient'
+  return pageMode === PageMode.PAGE_UPDATE ? 'Editar paciente' : 'Cadastrar novo paciente'
 })
 
 const submitForm = async () => {
   isLoadingForm.value = true
+
+  const body = {
+    ...form.value,
+    documentNumber: clearMask(form.value.documentNumber),
+    phoneNumber: clearMask(form.value.phoneNumber),
+    dBirthDate: dateFormat(
+      form.value.dBirthDate,
+      DateFormatEnum.FullDateAmerican.value,
+      DateFormatEnum.FullDate.value
+    )
+  }
+
   const response = await request<PatientForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
     endpoint: pageMode == PageMode.PAGE_INSERT ? 'patient/insert' : `patient/update/${id}`,
-    body: form.value
+    body
   })
 
   if (response.isError) return
 
   toastStore.setToast({
     type: 'success',
-    text: `Especialidade ${pageMode == PageMode.PAGE_INSERT ? 'criada' : 'alterada'} com sucesso!`
+    text: `Paciente ${pageMode == PageMode.PAGE_INSERT ? 'criado' : 'alterado'} com sucesso!`
   })
 
   router.push({ name: 'patient-list' })
-
   isLoadingForm.value = false
 }
 
 const loadForm = async () => {
-  if (pageMode === PageMode.PAGE_INSERT) return
-
   isLoadingForm.value = true
-  const patientFormResponse = await request<undefined, PatientForm>({
+
+  const statusRequest = request<undefined, GetStatusListResponse>({
     method: 'GET',
-    endpoint: `patient/update/${id}`
+    endpoint: 'status/list'
   })
 
-  if (patientFormResponse?.isError) return
+  const requests: Promise<any>[] = [statusRequest]
 
-  form.value = patientFormResponse.data
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    const patientFormRequest = request<undefined, PatientForm>({
+      method: 'GET',
+      endpoint: `patient/listById/${id}`
+    })
+
+    requests.push(patientFormRequest)
+  }
+
+  const [statusResponse, patientFormResponse] = await Promise.all(requests)
+
+  if (statusResponse.isError || patientFormResponse?.isError) return
+
+  statusItems.value = statusResponse.data.items
+
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    form.value = patientFormResponse.data
+  }
+
   isLoadingForm.value = false
 }
 
@@ -122,12 +124,31 @@ onMounted(() => {
 
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
-        <v-col cols="12">
+        <v-col cols="4">
           <v-text-field v-model.trim="form.patientName" label="Nome" hide-details />
         </v-col>
+        <v-col cols="2">
+          <v-select
+            v-model="form.statusId"
+            label="Status"
+            :loading="isLoadingForm"
+            :items="statusItems"
+            item-value="statusId"
+            item-title="statusName"
+            clearable
+            hide-details
+          />
+        </v-col>
       </v-row>
-
       <v-row>
+        <v-col cols="4">
+          <v-text-field
+            v-model.trim="form.documentNumber"
+            v-maska="documentNumberMask"
+            label="CPF"
+            hide-details
+          />
+        </v-col>
         <v-col cols="4">
           <v-text-field
             v-model.trim="form.phoneNumber"
@@ -136,35 +157,11 @@ onMounted(() => {
             hide-details
           />
         </v-col>
-
         <v-col cols="4">
           <v-text-field
-            v-model.trim="form.documentNumber"
-            v-maska="documentNumberMask"
-            label="Documento"
-            hide-details
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            v-model.trim="form.birthDate"
+            v-model.trim="form.dBirthDate"
             v-maska="dateMask"
-            label="Nascimento"
-            hide-details
-          />
-        </v-col>
-
-        <v-col cols="4">
-          <v-select
-            v-model="filterStatusId"
-            label="Status"
-            :loading="isLoadingFilter"
-            :items="statusItems"
-            item-value="statusId"
-            item-title="statusName"
-            clearable
+            label="Data de Nascimento"
             hide-details
           />
         </v-col>

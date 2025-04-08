@@ -51,7 +51,7 @@ const loadDataTable = async () => {
     body: {
       itemsPerPage: itemsPerPage.value,
       page: page.value,
-      name: filterName.value
+      doctorName: filterName.value
     }
   })
 
@@ -116,9 +116,9 @@ const deleteListItem = async (item: IDoctor) => {
         item-value="id"
         @update:options="handleDataTableUpdate"
       >
-        <template #[`item.specialtyName`]="{ item }"> {{ item.specialty.doctorName }} </template>
+        <template #[`item.specialtyName`]="{ item }"> {{ item.specialty.specialtyName }} </template>
         <template #[`item.ScheduleDuration`]="{ item }">
-          {{ item.specialty.scheduleDuration }}
+          {{ item.specialty.nScheduleDuration }}
         </template>
         <template #[`item.statusName`]="{ item }"> {{ item.status.statusName }} </template>
 

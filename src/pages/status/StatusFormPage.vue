@@ -117,11 +117,11 @@ onMounted(() => {
         <v-col cols="6">
           <v-select
             v-model="filterStatusType"
-            label="Tipo Status"
+            label="Tipo"
             :loading="isLoadingFilter"
             :items="statusTypeItems"
-            item-value="statusId"
-            item-title="statusName"
+            item-value="statusType"
+            item-title="statusTypeName"
             clearable
             hide-details
           />

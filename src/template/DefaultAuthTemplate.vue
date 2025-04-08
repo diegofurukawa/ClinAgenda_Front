@@ -178,8 +178,6 @@ onMounted(() => {
       <div class="content" :class="contentClass">
         <slot />
       </div>
-      © 2025 ClinAgenda - Sistema para Controle de Pacientes e Recepção - Desenvolvido por Diego
-      Furukawa inc.
     </div>
 
     <!-- Footer -->

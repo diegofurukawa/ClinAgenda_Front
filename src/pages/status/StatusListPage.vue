@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
-import { mdiPlusCircle, mdiTrashCan } from '@mdi/js'
+import { mdiPlusCircle, mdiTrashCan, mdiSquareEditOutline } from '@mdi/js'
 import type {
   IStatus,
   IStatusType,
@@ -21,9 +21,8 @@ const isLoadingFilter = ref<boolean>(false)
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
-// const items = ref<IStatus[]>([])
 const items = ref<IStatus[]>([])
-
+const filterStatusType = ref<IStatusType['statusType'] | null>(null)
 const statusTypeItems = ref<IStatusType[]>([])
 
 const headers = [
@@ -59,7 +58,8 @@ const loadDataTable = async () => {
     endpoint: 'status/list',
     body: {
       itemsPerPage: itemsPerPage.value,
-      page: page.value
+      page: page.value,
+      statusName: ''
     }
   })
 
@@ -143,7 +143,20 @@ onMounted(() => {
                 :loading="isLoadingFilter"
                 :items="statusTypeItems"
                 item-value="statusType"
-                item-title="statusType"
+                item-title="statusTypeName"
+                clearable
+                hide-details
+              />
+            </v-col>
+
+            <v-col>
+              <v-select
+                v-model="filterStatusType"
+                label="Ativo"
+                :loading="isLoadingFilter"
+                :items="statusTypeItems"
+                item-value="statusType"
+                item-title="statusTypeName"
                 clearable
                 hide-details
               />
@@ -162,11 +175,17 @@ onMounted(() => {
         :items-length="total"
         :items="items"
         :loading="isLoadingList"
-        item-value="id"
+        item-value="statusType"
         @update:options="handleDataTableUpdate"
       >
+        <template #[`item.statusType`]="{ item }">
+          <v-chip>
+            {{ item.statusType }}
+          </v-chip>
+        </template>
+
         <template #[`item.actions`]="{ item }">
-          <v-tooltip text="Deletar status" location="left">
+          <v-tooltip text="Deletar Status" location="left">
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -175,6 +194,17 @@ onMounted(() => {
                 color="error"
                 class="mr-2"
                 @click="deleteListItem(item)"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip text="Editar Status" location="left">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                :icon="mdiSquareEditOutline"
+                size="small"
+                color="primary"
+                :to="{ name: 'status-update', params: { id: item.statusId } }"
               />
             </template>
           </v-tooltip>
