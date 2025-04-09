@@ -1,7 +1,8 @@
+// src/interfaces/status.ts
 export interface IStatus {
   statusId: number
   statusName: string
-  statustype: IStatusType
+  statusType: string
   dCreated: string
   dLastUpdated: string
   lActive: boolean
@@ -33,5 +34,5 @@ export type GetStatusTypeListResponse = {
 export type StatusForm = {
   statusName: IStatus['statusName']
   statusType: IStatusType['statusType']
+  lActive?: boolean
 }
-

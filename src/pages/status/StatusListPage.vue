@@ -11,7 +11,8 @@ import type {
 } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
-import { ActiveField, activeFieldOptions, StatusTypeOptions } from '@/enum'
+import { ActiveField, activeFieldOptions } from '@/enum'
+import { StatusTypeOptions, getStatusTypeDisplay } from '@/enum/statusType'
 
 const toastStore = useToastStore()
 
@@ -194,7 +195,7 @@ onMounted(() => {
             </v-col>
             <v-col>
               <div>
-                <!-- Teste básico de v-select normal -->
+                <!-- Select para filtro de status ativo -->
                 <v-select
                   v-model="filterActive"
                   label="Status Ativo"
@@ -223,10 +224,9 @@ onMounted(() => {
         item-value="statusId"
         @update:options="handleDataTableUpdate"
       >
-        <template #[`item.statustype`]="{ item }">
-          <v-chip>
-            {{ item.statustype }}
-          </v-chip>
+        <!-- Template para exibir o tipo de status traduzido -->
+        <template #[`item.statusType`]="{ item }">
+          {{ getStatusTypeDisplay(item.statusType) }}
         </template>
 
         <template #[`item.lActive`]="{ item }">
