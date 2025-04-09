@@ -11,6 +11,7 @@ export type GetSpecialtyListRequest = {
   itemsPerPage: number
   page: number
   specialtyName?: ISpecialty['specialtyName']
+  lActive?: ISpecialty['lActive']
 }
 
 export type GetSpecialtyListResponse = {

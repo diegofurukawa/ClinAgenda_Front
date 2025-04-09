@@ -7,6 +7,7 @@ export interface IPatient {
   documentNumber: string
   dBirthDate: string
   status: IStatus
+  lActive: boolean
 }
 
 export type GetPatientListRequest = {
@@ -15,6 +16,7 @@ export type GetPatientListRequest = {
   patientName: IPatient['patientName']
   documentNumber: IPatient['documentNumber']
   statusId: IStatus['statusId'] | null
+  lActive?: IPatient['lActive'] | null
 }
 
 export type GetPatientListResponse = {

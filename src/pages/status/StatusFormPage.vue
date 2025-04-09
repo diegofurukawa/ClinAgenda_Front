@@ -18,8 +18,8 @@ const isLoadingFilter = ref<boolean>(false)
 const statusTypeItems = ref<IStatusType[]>([])
 const filterActive = ref<string>(ActiveField.ATIVO) // Inicialize com o valor padrão
 
-const id = route.params.id
-const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
+const statusId = route.params.id
+const pageMode = statusId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const loadFilters = async () => {
   isLoadingFilter.value = true
@@ -74,7 +74,7 @@ const submitForm = async () => {
 
   const response = await request<StatusForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
-    endpoint: pageMode == PageMode.PAGE_INSERT ? 'status/insert' : `status/update/${id}`,
+    endpoint: pageMode == PageMode.PAGE_INSERT ? 'status/insert' : `status/update/${statusId}`,
     body: requestData
   })
 
@@ -105,7 +105,7 @@ const loadForm = async () => {
   try {
     const statusFormResponse = await request<undefined, StatusForm & { lActive: boolean }>({
       method: 'GET',
-      endpoint: `status/update/${id}`
+      endpoint: `status/update/${statusId}`
     })
 
     if (statusFormResponse?.isError) {

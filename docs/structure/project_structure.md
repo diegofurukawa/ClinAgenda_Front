@@ -14,6 +14,7 @@
 │   ├── assets
 │   │   ├── logo.png
 │   │   └── logo.svg
+│   ├── AuthApp.vue
 │   ├── components
 │   │   ├── ClinDatePicker.vue
 │   │   ├── ClinicToast.vue
@@ -23,9 +24,12 @@
 │   │   ├── mock.ts
 │   │   └── vuetify.ts
 │   ├── enum
+│   │   ├── activeField.ts
 │   │   ├── index.ts
-│   │   └── pageMode.ts
+│   │   ├── pageMode.ts
+│   │   └── statusType.ts
 │   ├── interfaces
+│   │   ├── auth.ts
 │   │   ├── doctor.ts
 │   │   ├── index.ts
 │   │   ├── patient.ts
@@ -40,6 +44,8 @@
 │   │   ├── doctor
 │   │   │   ├── DoctorFormPage.vue
 │   │   │   └── DoctorListPage.vue
+│   │   ├── home
+│   │   │   └── HomePage.vue
 │   │   ├── notfound
 │   │   │   └── NotFoundPage.vue
 │   │   ├── patient
@@ -78,4 +84,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-21 directories, 57 files
+22 directories, 62 files

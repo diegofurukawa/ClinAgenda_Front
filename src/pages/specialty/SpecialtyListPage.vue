@@ -9,6 +9,7 @@ import type {
 } from '@/interfaces/specialty'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
+import { ActiveField, activeFieldOptions } from '@/enum'
 
 const toastStore = useToastStore()
 const isLoadingList = ref<boolean>(false)
@@ -17,6 +18,11 @@ const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<ISpecialty[]>([])
+const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
+
+// Console.log para debug
+console.log('ActiveField enum:', ActiveField)
+console.log('Initial filterActive value:', filterActive.value)
 
 const headers = [
   {
@@ -28,6 +34,7 @@ const headers = [
   },
   { title: 'Nome', key: 'specialtyName', sortable: false },
   { title: 'Duração', key: 'nScheduleDuration', sortable: false },
+  { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
     key: 'actions',
@@ -45,13 +52,25 @@ const handleDataTableUpdate = async ({ page: tablePage, itemsPerPage: tableItems
 
 const loadDataTable = async () => {
   isLoadingList.value = true
+
+  // Log para debug
+  console.log('Enviando filtro active:', filterActive.value)
+
+  let activeBoolean = undefined
+  if (filterActive.value === ActiveField.ATIVO) {
+    activeBoolean = true
+  } else if (filterActive.value === ActiveField.INATIVO) {
+    activeBoolean = false
+  }
+
   const { isError, data } = await request<GetSpecialtyListRequest, GetSpecialtyListResponse>({
     method: 'GET',
     endpoint: 'Specialty/list',
     body: {
       itemsPerPage: itemsPerPage.value,
       page: page.value,
-      specialtyName: filterName.value
+      specialtyName: filterName.value,
+      lActive: activeBoolean
     }
   })
 
@@ -115,6 +134,20 @@ const deleteListItem = async (item: ISpecialty) => {
             <v-col>
               <v-text-field v-model.trim="filterName" label="Nome" hide-details />
             </v-col>
+            <v-col>
+              <div>
+                <!-- Teste básico de v-select normal -->
+                <v-select
+                  v-model="filterActive"
+                  label="Status Ativo"
+                  :items="activeFieldOptions"
+                  item-value="value"
+                  item-title="title"
+                  hide-details
+                  variant="outlined"
+                />
+              </div>
+            </v-col>
             <v-col cols="auto" class="d-flex align-center">
               <v-btn color="primary" type="submit">Filtrar</v-btn>
             </v-col>
@@ -133,6 +166,12 @@ const deleteListItem = async (item: ISpecialty) => {
       >
         <template #[`item.nScheduleDuration`]="{ item }">
           {{ item.nScheduleDuration }} mininutos
+        </template>
+
+        <template #[`item.lActive`]="{ item }">
+          <v-chip :color="item.lActive ? 'success' : 'error'" size="small">
+            {{ item.lActive ? 'Ativo' : 'Inativo' }}
+          </v-chip>
         </template>
 
         <template #[`item.actions`]="{ item }">
@@ -155,7 +194,7 @@ const deleteListItem = async (item: ISpecialty) => {
                 :icon="mdiSquareEditOutline"
                 size="small"
                 color="primary"
-                :to="{ name: 'status-update', params: { id: item.specialtyId } }"
+                :to="{ name: 'specialty-update', params: { id: item.specialtyId } }"
               />
             </template>
           </v-tooltip>

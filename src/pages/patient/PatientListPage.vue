@@ -15,20 +15,19 @@ import {
   maskDocumentNumber,
   maskPhoneNumber
 } from '@/utils'
+import { ActiveField, activeFieldOptions } from '@/enum'
 
 const toastStore = useToastStore()
-
 const isLoadingList = ref<boolean>(false)
 const isLoadingFilter = ref<boolean>(false)
-
 const filterName = ref<GetPatientListRequest['patientName']>('')
 const filterDocumentNumber = ref<GetPatientListRequest['documentNumber']>('')
 const filterStatusId = ref<IStatus['statusId'] | null>(null)
-
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<IPatient[]>([])
+const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
 
 const headers = [
   {
@@ -43,6 +42,7 @@ const headers = [
   { title: 'Telefone', key: 'phoneNumber', sortable: false },
   { title: 'Data Nascimento', key: 'dBirthDate', sortable: false },
   { title: 'Status', key: 'status', sortable: false },
+  { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
     key: 'actions',
@@ -61,6 +61,20 @@ const handleDataTableUpdate = async ({ page: tablePage, itemsPerPage: tableItems
 const loadDataTable = async () => {
   try {
     isLoadingList.value = true
+
+    // Log para debug
+    console.log('Enviando filtro active:', filterActive.value)
+
+    let activeBoolean = undefined
+    if (filterActive.value === ActiveField.ATIVO) {
+      activeBoolean = true
+    } else if (filterActive.value === ActiveField.INATIVO) {
+      activeBoolean = false
+    }
+
+    // Log para debug
+    console.log('Valor convertido para API:', activeBoolean)
+
     const { isError, data } = await request<GetPatientListRequest, GetPatientListResponse>({
       method: 'GET',
       endpoint: 'patient/list',
@@ -69,7 +83,8 @@ const loadDataTable = async () => {
         page: page.value,
         patientName: filterName.value,
         documentNumber: clearMask(filterDocumentNumber.value),
-        statusId: filterStatusId.value
+        statusId: filterStatusId.value,
+        lActive: activeBoolean
       }
     })
 
@@ -172,6 +187,22 @@ onMounted(() => {
                 hide-details
               />
             </v-col>
+
+            <v-col>
+              <div>
+                <!-- Teste básico de v-select normal -->
+                <v-select
+                  v-model="filterActive"
+                  label="Ativo"
+                  :items="activeFieldOptions"
+                  item-value="value"
+                  item-title="title"
+                  hide-details
+                  variant="outlined"
+                />
+              </div>
+            </v-col>
+
             <v-col cols="auto" class="d-flex align-center">
               <v-btn color="primary" type="submit">Filtrar</v-btn>
             </v-col>
@@ -200,6 +231,12 @@ onMounted(() => {
         </template>
         <template #[`item.dBirthDate`]="{ item }">
           <div>{{ dateFormat(item.dBirthDate, DateFormatEnum.FullDate.value) }}</div>
+        </template>
+
+        <template #[`item.lActive`]="{ item }">
+          <v-chip :color="item.lActive ? 'success' : 'error'" size="small">
+            {{ item.lActive ? 'Ativo' : 'Inativo' }}
+          </v-chip>
         </template>
 
         <template #[`item.actions`]="{ item }">

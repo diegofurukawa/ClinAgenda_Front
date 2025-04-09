@@ -11,7 +11,7 @@ import type {
 } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
-import { ActiveField, activeFieldOptions } from '@/enum'
+import { ActiveField, activeFieldOptions, StatusTypeOptions } from '@/enum'
 
 const toastStore = useToastStore()
 
@@ -34,14 +34,14 @@ console.log('Initial filterActive value:', filterActive.value)
 
 const headers = [
   {
-    title: 'StatusId',
+    title: 'Id',
     key: 'statusId',
     sortable: false,
     width: 0,
     cellProps: { class: 'text-no-wrap' }
   },
-  { title: 'Nome', key: 'statusName', sortable: false },
-  { title: 'Tipo', key: 'statusType', sortable: false },
+  { title: 'Descrição', key: 'statusName', sortable: false },
+  { title: 'Tipo Status', key: 'statusType', sortable: false },
   { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
@@ -184,16 +184,14 @@ onMounted(() => {
                 v-model="filterStatusType"
                 label="Tipo"
                 :loading="isLoadingFilter"
-                :items="statusTypeItems"
-                item-value="statusType"
-                item-title="statusTypeName"
+                :items="StatusTypeOptions"
+                item-value="value"
+                item-title="title"
                 clearable
                 hide-details
                 variant="outlined"
               />
             </v-col>
-
-            <!-- Verificação de visibilidade do componente -->
             <v-col>
               <div>
                 <!-- Teste básico de v-select normal -->
@@ -225,9 +223,9 @@ onMounted(() => {
         item-value="statusId"
         @update:options="handleDataTableUpdate"
       >
-        <template #[`item.statusType`]="{ item }">
+        <template #[`item.statustype`]="{ item }">
           <v-chip>
-            {{ item.statusType }}
+            {{ item.statustype }}
           </v-chip>
         </template>
 

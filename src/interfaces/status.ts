@@ -1,7 +1,7 @@
 export interface IStatus {
   statusId: number
   statusName: string
-  statusType: string
+  statustype: IStatusType
   dCreated: string
   dLastUpdated: string
   lActive: boolean
@@ -16,7 +16,7 @@ export type GetStatusListRequest = {
   itemsPerPage: number
   page: number
   statusName?: IStatus['statusName']
-  statusType?: IStatus['statusType']
+  statusType?: IStatusType['statusType'] | null
   lActive?: IStatus['lActive']
 }
 
@@ -32,6 +32,6 @@ export type GetStatusTypeListResponse = {
 
 export type StatusForm = {
   statusName: IStatus['statusName']
-  statusType: IStatus['statusType']
+  statusType: IStatusType['statusType']
 }
 
