@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
 import type { DoctorForm } from '@/interfaces/doctor'
+import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
@@ -14,51 +15,75 @@ const route = useRoute()
 
 const isLoadingForm = ref<boolean>(false)
 
-const id = route.params.id
-const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
+const doctorId = route.params.id
+const pageMode = doctorId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<DoctorForm>({
-  name: '',
-  specialtyId: '',
-  statusId: ''
+  doctorName: '',
+  specialtyId: 0,
+  statusId: null,
+  lActive: true
 })
+const statusItems = ref<IStatus[]>([])
 
 const pageTitle = computed(() => {
-  return pageMode === PageMode.PAGE_UPDATE ? 'Editar doctor' : 'Cadastrar novo doctor'
+  return pageMode === PageMode.PAGE_UPDATE ? 'Editar Profissional' : 'Cadastrar novo Profissional'
 })
 
 const submitForm = async () => {
   isLoadingForm.value = true
+
+  const body = {
+    ...form.value,
+    specialtyId: form.value.specialtyId
+  }
+
   const response = await request<DoctorForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
-    endpoint: pageMode == PageMode.PAGE_INSERT ? 'doctor/insert' : `doctor/update/${id}`,
-    body: form.value
+    endpoint: pageMode == PageMode.PAGE_INSERT ? 'doctor/insert' : `doctor/update/${doctorId}`,
+    body
   })
 
   if (response.isError) return
 
   toastStore.setToast({
     type: 'success',
-    text: `Doutor ${pageMode == PageMode.PAGE_INSERT ? 'criada' : 'alterada'} com sucesso!`
+    text: `Paciente ${pageMode == PageMode.PAGE_INSERT ? 'criado' : 'alterado'} com sucesso!`
   })
 
   router.push({ name: 'doctor-list' })
-
   isLoadingForm.value = false
 }
 
 const loadForm = async () => {
-  if (pageMode === PageMode.PAGE_INSERT) return
-
   isLoadingForm.value = true
-  const doctorFormResponse = await request<undefined, DoctorForm>({
+
+  const statusRequest = request<undefined, GetStatusListResponse>({
     method: 'GET',
-    endpoint: `doctor/update/${id}`
+    endpoint: 'status/list'
   })
 
-  if (doctorFormResponse?.isError) return
+  const requests: Promise<any>[] = [statusRequest]
 
-  form.value = doctorFormResponse.data
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    const doctorFormRequest = request<undefined, DoctorForm>({
+      method: 'GET',
+      endpoint: `doctor/listById/${doctorId}`
+    })
+
+    requests.push(doctorFormRequest)
+  }
+
+  const [statusResponse, doctorFormResponse] = await Promise.all(requests)
+
+  if (statusResponse.isError || doctorFormResponse?.isError) return
+
+  statusItems.value = statusResponse.data.items
+
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    form.value = doctorFormResponse.data
+  }
+
   isLoadingForm.value = false
 }
 
@@ -75,6 +100,7 @@ onMounted(() => {
 
     <template #action>
       <v-btn :prepend-icon="mdiCancel" :to="{ name: 'doctor-list' }"> Cancelar </v-btn>
+
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" @click.prevent="submitForm">
         Salvar
       </v-btn>
@@ -82,16 +108,35 @@ onMounted(() => {
 
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
-        <v-col cols="6">
-          <v-text-field v-model.trim="form.name" label="Nome" hide-details />
+        <v-col cols="4">
+          <v-text-field v-model.trim="form.doctorName" label="Profissional" hide-details />
         </v-col>
-
-        <v-col cols="6">
-          <v-text-field v-model.trim="form.specialtyId" label="Especialidade" hide-details />
+        <v-col cols="2">
+          <v-select
+            v-model="form.statusId"
+            label="Status"
+            :loading="isLoadingForm"
+            :items="statusItems"
+            item-value="statusId"
+            item-title="statusName"
+            clearable
+            hide-details
+          />
         </v-col>
+      </v-row>
 
-        <v-col cols="6">
-          <v-text-field v-model.trim="form.statusId" label="Status" hide-details />
+      <v-row>
+        <v-col cols="2">
+          <v-select
+            v-model="form.statusId"
+            label="Status"
+            :loading="isLoadingForm"
+            :items="statusItems"
+            item-value="statusId"
+            item-title="statusName"
+            clearable
+            hide-details
+          />
         </v-col>
       </v-row>
     </v-form>

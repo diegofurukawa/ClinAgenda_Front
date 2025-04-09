@@ -11,7 +11,7 @@ import type {
 } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
-import router from '@/router'
+import { ActiveField, activeFieldOptions } from '@/enum'
 
 const toastStore = useToastStore()
 
@@ -22,8 +22,15 @@ const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<IStatus[]>([])
+
+const filterStatusName = ref<string>('')
 const filterStatusType = ref<IStatusType['statusType'] | null>(null)
+const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
 const statusTypeItems = ref<IStatusType[]>([])
+
+// Console.log para debug
+console.log('ActiveField enum:', ActiveField)
+console.log('Initial filterActive value:', filterActive.value)
 
 const headers = [
   {
@@ -53,17 +60,36 @@ const handleDataTableUpdate = async ({ page: tablePage, itemsPerPage: tableItems
 
 const loadDataTable = async () => {
   isLoadingList.value = true
+
+  // Log para debug
+  console.log('Enviando filtro active:', filterActive.value)
+
+  let activeBoolean = undefined
+  if (filterActive.value === ActiveField.ATIVO) {
+    activeBoolean = true
+  } else if (filterActive.value === ActiveField.INATIVO) {
+    activeBoolean = false
+  }
+
+  // Log para debug
+  console.log('Valor convertido para API:', activeBoolean)
+
   const { isError, data } = await request<GetStatusListRequest, GetStatusListResponse>({
     method: 'GET',
     endpoint: 'status/list',
     body: {
       itemsPerPage: itemsPerPage.value,
       page: page.value,
-      statusName: ''
+      statusName: filterStatusName.value || undefined,
+      statusType: filterStatusType.value || undefined,
+      lActive: activeBoolean
     }
   })
 
-  if (isError) return
+  if (isError) {
+    console.error('Erro ao carregar dados:', isError)
+    return
+  }
 
   items.value = data.items
   total.value = data.total
@@ -79,14 +105,17 @@ const loadFilters = async () => {
       endpoint: 'status/types'
     })
 
-    if (statusTypeResponse.isError) return
+    if (statusTypeResponse.isError) {
+      console.error('Erro ao carregar tipos de status:', statusTypeResponse)
+      return
+    }
 
     statusTypeItems.value = statusTypeResponse.data.items
   } catch (e) {
-    console.error('Erro ao buscar items do filtro', e)
+    console.error('Erro ao buscar itens do filtro', e)
+  } finally {
+    isLoadingFilter.value = false
   }
-
-  isLoadingFilter.value = false
 }
 
 const deleteListItem = async (item: IStatus) => {
@@ -100,14 +129,15 @@ const deleteListItem = async (item: IStatus) => {
       endpoint: `status/delete/${item.statusId}`
     })
 
-    if (response.isError) return
+    if (response.isError) {
+      console.error('Erro ao deletar status:', response)
+      return
+    }
 
     toastStore.setToast({
       type: 'success',
-      text: 'Status deletada com sucesso!'
+      text: 'Status deletado com sucesso!'
     })
-
-    router.push({ name: 'status-list' })
 
     loadDataTable()
   } catch (e) {
@@ -116,7 +146,9 @@ const deleteListItem = async (item: IStatus) => {
 }
 
 onMounted(() => {
+  console.log('Component mounted')
   loadFilters()
+  loadDataTable()
 })
 </script>
 
@@ -135,6 +167,17 @@ onMounted(() => {
       <v-sheet class="pa-4 mb-4">
         <v-form @submit.prevent="loadDataTable">
           <v-row>
+            <!-- Filtro de Nome -->
+            <v-col>
+              <v-text-field
+                v-model="filterStatusName"
+                label="Nome"
+                variant="outlined"
+                hide-details
+                clearable
+              />
+            </v-col>
+
             <!-- Filtro de Tipo Status -->
             <v-col>
               <v-select
@@ -146,20 +189,24 @@ onMounted(() => {
                 item-title="statusTypeName"
                 clearable
                 hide-details
+                variant="outlined"
               />
             </v-col>
 
+            <!-- Verificação de visibilidade do componente -->
             <v-col>
-              <v-select
-                v-model="filterStatusType"
-                label="Ativo"
-                :loading="isLoadingFilter"
-                :items="statusTypeItems"
-                item-value="statusType"
-                item-title="statusTypeName"
-                clearable
-                hide-details
-              />
+              <div>
+                <!-- Teste básico de v-select normal -->
+                <v-select
+                  v-model="filterActive"
+                  label="Status Ativo"
+                  :items="activeFieldOptions"
+                  item-value="value"
+                  item-title="title"
+                  hide-details
+                  variant="outlined"
+                />
+              </div>
             </v-col>
 
             <v-col cols="auto" class="d-flex align-center">
@@ -175,12 +222,18 @@ onMounted(() => {
         :items-length="total"
         :items="items"
         :loading="isLoadingList"
-        item-value="statusType"
+        item-value="statusId"
         @update:options="handleDataTableUpdate"
       >
         <template #[`item.statusType`]="{ item }">
           <v-chip>
             {{ item.statusType }}
+          </v-chip>
+        </template>
+
+        <template #[`item.lActive`]="{ item }">
+          <v-chip :color="item.lActive ? 'success' : 'error'" size="small">
+            {{ item.lActive ? 'Ativo' : 'Inativo' }}
           </v-chip>
         </template>
 

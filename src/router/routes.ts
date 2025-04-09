@@ -10,6 +10,7 @@ import NotFoundPage from '@/pages/notfound/NotFoundPage.vue'
 import StatusListPage from '@/pages/status/StatusListPage.vue'
 import StatusFormPage from '@/pages/status/StatusFormPage.vue'
 
+// Get user info from the auth store
 import SpecialtyListPage from '@/pages/specialty/SpecialtyListPage.vue'
 import SpecialtyFormPage from '@/pages/specialty/SpecialtyFormPage.vue'
 
@@ -189,3 +190,4 @@ export const routes: Array<RouteRecordRaw> = [
 ]
 
 export default routes
+

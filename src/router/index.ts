@@ -1,6 +1,6 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
-import { routes } from '@/router/auth/Routes'
+import { routes } from '@/router/routes'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
 
@@ -84,3 +84,4 @@ router.afterEach((to) => {
 })
 
 export default router
+

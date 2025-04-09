@@ -1,6 +1,5 @@
 export enum PageMode {
   PAGE_INSERT,
-  PAGE_UPDATE,
-  PAGE_FORM
+  PAGE_UPDATE
 }
 

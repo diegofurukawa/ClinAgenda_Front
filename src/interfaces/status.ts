@@ -15,7 +15,9 @@ export interface IStatusType {
 export type GetStatusListRequest = {
   itemsPerPage: number
   page: number
-  statusName: IStatus['statusName']
+  statusName?: IStatus['statusName']
+  statusType?: IStatus['statusType']
+  lActive?: IStatus['lActive']
 }
 
 export type GetStatusListResponse = {

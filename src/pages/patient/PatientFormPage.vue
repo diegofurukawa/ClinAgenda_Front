@@ -24,8 +24,8 @@ const route = useRoute()
 
 const isLoadingForm = ref<boolean>(false)
 
-const id = route.params.id
-const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
+const patientId = route.params.id
+const pageMode = patientId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<PatientForm>({
   patientName: '',
@@ -57,7 +57,7 @@ const submitForm = async () => {
 
   const response = await request<PatientForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
-    endpoint: pageMode == PageMode.PAGE_INSERT ? 'patient/insert' : `patient/update/${id}`,
+    endpoint: pageMode == PageMode.PAGE_INSERT ? 'patient/insert' : `patient/update/${patientId}`,
     body
   })
 
@@ -85,7 +85,7 @@ const loadForm = async () => {
   if (pageMode === PageMode.PAGE_UPDATE) {
     const patientFormRequest = request<undefined, PatientForm>({
       method: 'GET',
-      endpoint: `patient/listById/${id}`
+      endpoint: `patient/listById/${patientId}`
     })
 
     requests.push(patientFormRequest)
