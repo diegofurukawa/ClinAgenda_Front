@@ -22,6 +22,9 @@ import DoctorFormPage from '@/pages/doctor/DoctorFormPage.vue'
 
 export const routes: Array<RouteRecordRaw> = [
   // Rotas que usam DefaultTemplate
+  //===========================================================
+  //Rotas de Home
+  //===========================================================
   {
     path: '/',
     name: 'home',
@@ -32,6 +35,9 @@ export const routes: Array<RouteRecordRaw> = [
       layout: 'default'
     }
   },
+  //===========================================================
+  //Rotas de Dashboard
+  //===========================================================
   {
     path: '/dashboard',
     name: 'dashboard',
@@ -42,6 +48,9 @@ export const routes: Array<RouteRecordRaw> = [
       layout: 'default'
     }
   },
+  //===========================================================
+  //Rotas de Status
+  //===========================================================
   {
     path: '/status',
     name: 'status-list',
@@ -74,6 +83,9 @@ export const routes: Array<RouteRecordRaw> = [
       layout: 'default'
     }
   },
+  //===========================================================
+  //Rotas de Specialty - Especialidades
+  //===========================================================
   {
     path: '/specialty',
     name: 'specialty-list',
@@ -106,6 +118,9 @@ export const routes: Array<RouteRecordRaw> = [
       layout: 'default'
     }
   },
+  //===========================================================
+  //Rotas de Patient - Pacientes
+  //===========================================================
   {
     path: '/patient',
     name: 'patient-list',
@@ -138,6 +153,9 @@ export const routes: Array<RouteRecordRaw> = [
       layout: 'default'
     }
   },
+  //===========================================================
+  //Rotas de Doctor - Profissional
+  //===========================================================
   {
     path: '/doctor',
     name: 'doctor-list',
@@ -162,6 +180,42 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: '/doctor/:id',
     name: 'doctor-update',
+    component: DoctorFormPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Editar Médico',
+      mode: PageMode.PAGE_UPDATE,
+      layout: 'default'
+    }
+  },
+
+  //===========================================================
+  //Rotas de Appointment - Agenda
+  //===========================================================
+  {
+    path: '/appointment',
+    name: 'appointment-list',
+    component: DoctorListPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Médicos',
+      layout: 'default'
+    }
+  },
+  {
+    path: '/appointment/insert',
+    name: 'appointment-insert',
+    component: DoctorFormPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Novo Médico',
+      mode: PageMode.PAGE_INSERT,
+      layout: 'default'
+    }
+  },
+  {
+    path: '/appointment/:id',
+    name: 'appointment-update',
     component: DoctorFormPage,
     meta: {
       requiresAuth: true,

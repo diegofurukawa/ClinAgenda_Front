@@ -4,7 +4,15 @@ import { useRouter } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
 import { useAuthStore } from '@/stores/auth'
 import ClinicToast from '@/components/ClinicToast.vue'
-import { mdiAccountTag, mdiHome, mdiPacMan, mdiDoctor, mdiTag, mdiLogout } from '@mdi/js'
+import {
+  mdiAccountTag,
+  mdiHome,
+  mdiDoctor,
+  mdiTag,
+  mdiLogout,
+  mdiClockOutline,
+  mdiHuman
+} from '@mdi/js'
 
 const router = useRouter()
 const toastStore = useToastStore()
@@ -26,29 +34,15 @@ const userEmail = computed(() => {
 // Define all available menus
 const allMenus = [
   {
-    title: 'Dashboard',
-    icon: mdiHome,
-    to: { name: 'dashboard' },
+    title: 'Agendamento',
+    icon: mdiClockOutline,
+    to: { name: 'appointment-list' },
     requiresAuth: true,
-    roles: [] // All authenticated users
-  },
-  {
-    title: 'Status',
-    icon: mdiTag,
-    to: { name: 'status-list' },
-    requiresAuth: true,
-    roles: [] // Only admin can access
-  },
-  {
-    title: 'Especialidades',
-    icon: mdiAccountTag,
-    to: { name: 'specialty-list' },
-    requiresAuth: false,
-    roles: []
+    roles: ['admin']
   },
   {
     title: 'Pacientes',
-    icon: mdiPacMan,
+    icon: mdiHuman,
     to: { name: 'patient-list' },
     requiresAuth: true,
     roles: ['admin']
@@ -59,6 +53,27 @@ const allMenus = [
     to: { name: 'doctor-list' },
     requiresAuth: true,
     roles: ['admin']
+  },
+  {
+    title: 'Dashboard',
+    icon: mdiHome,
+    to: { name: 'dashboard' },
+    requiresAuth: true,
+    roles: [] // All authenticated users
+  },
+  {
+    title: 'Especialidades',
+    icon: mdiAccountTag,
+    to: { name: 'specialty-list' },
+    requiresAuth: false,
+    roles: []
+  },
+  {
+    title: 'Status',
+    icon: mdiTag,
+    to: { name: 'status-list' },
+    requiresAuth: true,
+    roles: [] // Only admin can access
   }
 ]
 

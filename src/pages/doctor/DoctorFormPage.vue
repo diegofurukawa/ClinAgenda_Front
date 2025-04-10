@@ -16,11 +16,11 @@ const route = useRoute()
 
 const isLoadingForm = ref<boolean>(false)
 
-const id = route.params.id
-const pageMode = id ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
+const doctorId = route.params.id
+const pageMode = doctorId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<DoctorForm>({
-  name: '',
+  doctorName: '',
   specialty: [],
   statusId: null
 })
@@ -36,7 +36,7 @@ const submitForm = async () => {
     isLoadingForm.value = true
     const response = await request<DoctorForm, null>({
       method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
-      endpoint: pageMode == PageMode.PAGE_INSERT ? 'doctor/insert' : `doctor/update/${id}`,
+      endpoint: pageMode == PageMode.PAGE_INSERT ? 'doctor/insert' : `doctor/update/${doctorId}`,
       body: form.value
     })
 
@@ -73,7 +73,7 @@ const loadForm = async () => {
   if (pageMode === PageMode.PAGE_UPDATE) {
     const doctorFormRequest = request<undefined, DoctorForm>({
       method: 'GET',
-      endpoint: `doctor/listById/${id}`
+      endpoint: `doctor/listById/${doctorId}`
     })
 
     requests.push(doctorFormRequest)
@@ -118,7 +118,7 @@ onMounted(() => {
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
         <v-col cols="6">
-          <v-text-field v-model.trim="form.name" label="Nome" hide-details />
+          <v-text-field v-model.trim="form.doctorName" label="Nome" hide-details />
         </v-col>
         <v-col cols="2">
           <v-select
@@ -126,8 +126,8 @@ onMounted(() => {
             label="Status"
             :loading="isLoadingForm"
             :items="statusItems"
-            item-value="id"
-            item-title="name"
+            item-value="statusId"
+            item-title="statusName"
             clearable
             hide-details
           />
@@ -138,10 +138,10 @@ onMounted(() => {
           <v-label>Especialidades</v-label>
           <v-checkbox
             v-for="specialty of specialtyItems"
-            :key="specialty.id"
+            :key="specialty.specialtyId"
             v-model="form.specialty"
-            :label="specialty.name"
-            :value="specialty.id"
+            :label="specialty.specialtyName"
+            :value="specialty.specialtyId"
           />
         </v-col>
       </v-row>
