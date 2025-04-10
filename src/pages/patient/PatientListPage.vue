@@ -152,7 +152,7 @@ onMounted(() => {
 
 <template>
   <DefaultTemplate>
-    <template #title> Lista de pacientes </template>
+    <template #title> Lista de Pacientes </template>
 
     <template #action>
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" :to="{ name: 'patient-insert' }">

@@ -2,91 +2,50 @@
 import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
+import type { PatientForm } from '@/interfaces/status'
+import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
-import { ActiveField, activeFieldOptions } from '@/enum'
-import type { StatusForm, IStatusType, GetStatusTypeListResponse } from '@/interfaces/status'
+import { activeFieldOptions, StatusTypeOptions } from '@/enum'
 
 const toastStore = useToastStore()
 const route = useRoute()
-
 const isLoadingForm = ref<boolean>(false)
-const isLoadingFilter = ref<boolean>(false)
-const statusTypeItems = ref<IStatusType[]>([])
-const filterActive = ref<string>(ActiveField.ATIVO) // Inicialize com o valor padrão
-
 const statusId = route.params.id
 const pageMode = statusId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
-const loadFilters = async () => {
-  isLoadingFilter.value = true
-
-  try {
-    const statusTypeResponse = await request<undefined, GetStatusTypeListResponse>({
-      method: 'GET',
-      endpoint: 'status/types'
-    })
-
-    if (statusTypeResponse.isError) {
-      console.error('Erro ao carregar tipos de status:', statusTypeResponse)
-      return
-    }
-
-    statusTypeItems.value = statusTypeResponse.data.items
-  } catch (e) {
-    console.error('Erro ao buscar itens do filtro', e)
-  } finally {
-    isLoadingFilter.value = false
-  }
-}
-
-const form = ref<StatusForm & { activeStatus: string }>({
+const form = ref<StatusForm>({
   statusName: '',
   statusType: '',
-  activeStatus: ActiveField.ATIVO // Valor default para formulário (true)
+  lActive: true
 })
 
+const statusItems = ref<IStatus[]>([])
+
 const pageTitle = computed(() => {
-  return pageMode === PageMode.PAGE_UPDATE ? 'Editar status' : 'Cadastrar novo status'
+  return pageMode === PageMode.PAGE_UPDATE ? 'Editar Status' : 'Cadastrar novo Status'
 })
 
 const submitForm = async () => {
   isLoadingForm.value = true
 
-  // Converter string para booleano
-  const lActive = form.value.activeStatus === 'true'
-
-  // Log para depuração
-  console.log('Enviando form:', {
+  const body = {
     ...form.value,
-    activeStatus: form.value.activeStatus,
-    lActive: lActive
-  })
-
-  const requestData = {
     statusName: form.value.statusName,
     statusType: form.value.statusType,
-    lActive: lActive
+    lActive: form.value.lActive
   }
 
-  const response = await request<StatusForm, null>({
+  const response = await request<PatientForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
     endpoint: pageMode == PageMode.PAGE_INSERT ? 'status/insert' : `status/update/${statusId}`,
-    body: requestData
+    body
   })
 
-  if (response.isError) {
-    console.error('Erro ao salvar status:', response)
-    toastStore.setToast({
-      type: 'error',
-      text: `Erro ao ${pageMode == PageMode.PAGE_INSERT ? 'criar' : 'alterar'} status!`
-    })
-    isLoadingForm.value = false
-    return
-  }
+  if (response.isError) return
 
   toastStore.setToast({
     type: 'success',
@@ -98,47 +57,39 @@ const submitForm = async () => {
 }
 
 const loadForm = async () => {
-  if (pageMode === PageMode.PAGE_INSERT) return
-
   isLoadingForm.value = true
 
-  try {
-    const statusFormResponse = await request<undefined, StatusForm & { lActive: boolean }>({
+  const statusRequest = request<undefined, GetStatusListResponse>({
+    method: 'GET',
+    endpoint: 'status/list'
+  })
+
+  const requests: Promise<any>[] = [statusRequest]
+
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    const statusFormRequest = request<undefined, StatusForm>({
       method: 'GET',
-      endpoint: `status/update/${statusId}`
+      endpoint: `status/listById/${statusId}`
     })
 
-    if (statusFormResponse?.isError) {
-      console.error('Erro ao carregar dados do status:', statusFormResponse)
-      toastStore.setToast({
-        type: 'error',
-        text: 'Erro ao carregar dados do status!'
-      })
-      return
-    }
-
-    // Converter booleano para string
-    form.value = {
-      ...statusFormResponse.data,
-      activeStatus: statusFormResponse.data.lActive ? 'true' : 'false'
-    }
-
-    console.log('Form carregado:', form.value)
-  } catch (e) {
-    console.error('Erro ao carregar dados do formulário:', e)
-    toastStore.setToast({
-      type: 'error',
-      text: 'Erro ao carregar dados do status!'
-    })
-  } finally {
-    isLoadingForm.value = false
+    requests.push(statusFormRequest)
   }
+
+  const [statusResponse, statusFormResponse] = await Promise.all(requests)
+
+  if (statusResponse.isError || statusFormResponse?.isError) return
+
+  statusItems.value = statusResponse.data.items
+
+  if (pageMode === PageMode.PAGE_UPDATE) {
+    form.value = statusFormResponse.data
+  }
+
+  isLoadingForm.value = false
 }
 
 onMounted(() => {
-  console.log('StatusFormPage mounted')
   loadForm()
-  loadFilters()
 })
 </script>
 
@@ -149,10 +100,7 @@ onMounted(() => {
     </template>
 
     <template #action>
-      <!-- Botão Cancelar -->
       <v-btn :prepend-icon="mdiCancel" :to="{ name: 'status-list' }"> Cancelar </v-btn>
-
-      <!-- Botão Salvar -->
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" @click.prevent="submitForm">
         Salvar
       </v-btn>
@@ -160,39 +108,26 @@ onMounted(() => {
 
     <v-form :disabled="isLoadingForm" @submit.prevent="submitForm">
       <v-row>
-        <v-col cols="6">
-          <v-text-field
-            v-model.trim="form.statusName"
-            label="Nome Status"
-            hide-details
-            variant="outlined"
-            required
-            :disabled="isLoadingForm"
-          />
+        <v-col cols="5">
+          <v-text-field v-model.trim="form.statusName" label="Nome" hide-details />
         </v-col>
-      </v-row>
-
-      <v-row>
-        <v-col cols="6">
+        <v-col cols="5">
           <v-select
             v-model="form.statusType"
-            label="Tipo Status"
-            :loading="isLoadingFilter"
-            :items="statusTypeItems"
-            item-value="statusType"
-            item-title="statusTypeName"
-            clearable
+            label="Tipo"
+            :items="StatusTypeOptions"
+            item-value="value"
+            item-title="title"
             hide-details
             variant="outlined"
-            :disabled="isLoadingForm"
           />
         </v-col>
 
-        <v-col cols="6">
+        <v-col cols="2">
           <div>
             <!-- Teste Active v-select normal -->
             <v-select
-              v-model="filterActive"
+              v-model="form.lActive"
               label="Status Ativo"
               :items="activeFieldOptions"
               item-value="value"

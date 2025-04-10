@@ -23,8 +23,8 @@ export type GetDoctorListResponse = {
 
 export type DoctorForm = {
   doctorName: IDoctor['doctorName']
-  specialtyId: ISpecialty['specialtyId']
+  specialty: Array<ISpecialty['specialtyId']>
   statusId: IStatus['statusId'] | null
-  lActive: boolean
+  lActive: boolean | null
 }
 

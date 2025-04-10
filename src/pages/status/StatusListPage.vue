@@ -26,7 +26,7 @@ const items = ref<IStatus[]>([])
 
 const filterStatusName = ref<string>('')
 const filterStatusType = ref<IStatusType['statusType'] | null>(null)
-const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
+const filterActive = ref<string>(ActiveField.TODOS)
 const statusTypeItems = ref<IStatusType[]>([])
 
 // Console.log para debug

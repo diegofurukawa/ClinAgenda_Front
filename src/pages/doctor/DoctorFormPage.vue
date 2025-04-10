@@ -20,7 +20,7 @@ const pageMode = doctorId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
 const form = ref<DoctorForm>({
   doctorName: '',
-  specialtyId: 0,
+  specialtyId: [],
   statusId: null,
   lActive: true
 })

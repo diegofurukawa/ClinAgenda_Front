@@ -21,9 +21,7 @@ import {
 
 const toastStore = useToastStore()
 const route = useRoute()
-
 const isLoadingForm = ref<boolean>(false)
-
 const patientId = route.params.id
 const pageMode = patientId ? PageMode.PAGE_UPDATE : PageMode.PAGE_INSERT
 
@@ -35,6 +33,7 @@ const form = ref<PatientForm>({
   statusId: null,
   lActive: true
 })
+
 const statusItems = ref<IStatus[]>([])
 
 const pageTitle = computed(() => {
