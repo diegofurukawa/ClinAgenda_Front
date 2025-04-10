@@ -3,36 +3,38 @@ import { onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiPlusCircle, mdiSquareEditOutline, mdiTrashCan } from '@mdi/js'
 import type { IDoctor, GetDoctorListRequest, GetDoctorListResponse } from '@/interfaces/doctor'
+import type { GetSpecialtyListResponse, ISpecialty } from '@/interfaces/specialty'
 import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
-import type { ISpecialty, GetSpecialtyListResponse } from '@/interfaces/specialty'
 import request from '@/engine/httpClient'
 import { useToastStore } from '@/stores'
+import { ActiveField, activeFieldOptions } from '@/enum'
 
 const toastStore = useToastStore()
-
 const isLoadingList = ref<boolean>(false)
 const isLoadingFilter = ref<boolean>(false)
-
-const filterDoctorName = ref<GetDoctorListRequest['doctorName']>('')
-const filterSpecialtyId = ref<GetDoctorListRequest['specialtyId'] | null>(null)
-const filterStatusId = ref<GetDoctorListRequest['statusId'] | null>(null)
-
+const filterName = ref<GetDoctorListRequest['doctorName']>('')
+const filterSpecialtyId = ref<ISpecialty['specialtyId'] | null>(null)
+const filterStatusId = ref<IStatus['statusId'] | null>(null)
 const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<IDoctor[]>([])
+const specialtyItems = ref<ISpecialty[]>([])
+const statusItems = ref<IStatus[]>([])
+const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
 
 const headers = [
   {
-    title: 'DoctorId',
+    title: 'ID',
     key: 'doctorId',
     sortable: false,
     width: 0,
     cellProps: { class: 'text-no-wrap' }
   },
-  { title: 'Profissional', key: 'doctorName', sortable: false },
-  { title: 'Especialidade(s)', key: 'specialtyName', sortable: false },
+  { title: 'Nome', key: 'doctorName', sortable: false },
+  { title: 'Especialidades', key: 'specialty', sortable: false },
   { title: 'Status', key: 'status', sortable: false },
+  { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
     key: 'actions',
@@ -51,15 +53,30 @@ const handleDataTableUpdate = async ({ page: tablePage, itemsPerPage: tableItems
 const loadDataTable = async () => {
   try {
     isLoadingList.value = true
+
+    // Log para debug
+    console.log('Enviando filtro active:', filterActive.value)
+
+    let activeBoolean = undefined
+    if (filterActive.value === ActiveField.ATIVO) {
+      activeBoolean = true
+    } else if (filterActive.value === ActiveField.INATIVO) {
+      activeBoolean = false
+    }
+
+    // Log para debug
+    console.log('Valor convertido para API:', activeBoolean)
+
     const { isError, data } = await request<GetDoctorListRequest, GetDoctorListResponse>({
       method: 'GET',
       endpoint: 'doctor/list',
       body: {
         itemsPerPage: itemsPerPage.value,
         page: page.value,
-        doctorName: filterDoctorName.value,
+        doctorName: filterName.value,
         specialtyId: filterSpecialtyId.value,
-        statusId: filterStatusId.value
+        statusId: filterStatusId.value,
+        lActive: activeBoolean
       }
     })
 
@@ -72,37 +89,27 @@ const loadDataTable = async () => {
     console.error('Erro ao buscar item da lista', e)
   }
 }
-// =================================================================
-// COMENTA
-// =================================================================
-const statusItems = ref<IStatus[]>([])
-const specialtyItems = ref<ISpecialty[]>([])
 
 const loadFilters = async () => {
   isLoadingFilter.value = true
 
-  try {
-    const statusResponse = await request<undefined, GetStatusListResponse>({
-      method: 'GET',
-      endpoint: 'status/list'
-    })
+  const specialtyRequest = request<undefined, GetSpecialtyListResponse>({
+    method: 'GET',
+    endpoint: 'specialty/list'
+  })
 
-    if (statusResponse.isError) return
-
-    statusItems.value = statusResponse.data.items
-  } catch (e) {
-    console.error('Erro ao buscar items do filtro', e)
-  }
+  const statusRequest = request<undefined, GetStatusListResponse>({
+    method: 'GET',
+    endpoint: 'status/list'
+  })
 
   try {
-    const specialtyResponse = await request<undefined, GetSpecialtyListResponse>({
-      method: 'GET',
-      endpoint: 'specialty/list'
-    })
+    const [specialtyResponse, statusResponse] = await Promise.all([specialtyRequest, statusRequest])
 
-    if (specialtyResponse.isError) return
+    if (specialtyResponse.isError || statusResponse.isError) return
 
     specialtyItems.value = specialtyResponse.data.items
+    statusItems.value = statusResponse.data.items
   } catch (e) {
     console.error('Erro ao buscar items do filtro', e)
   }
@@ -125,7 +132,7 @@ const deleteListItem = async (item: IDoctor) => {
 
     toastStore.setToast({
       type: 'success',
-      text: 'Paciente deletado com sucesso!'
+      text: 'Profissional deletado com sucesso!'
     })
 
     loadDataTable()
@@ -145,7 +152,7 @@ onMounted(() => {
 
     <template #action>
       <v-btn color="primary" :prepend-icon="mdiPlusCircle" :to="{ name: 'doctor-insert' }">
-        Adicionar Profissional
+        Adicionar profissional
       </v-btn>
     </template>
 
@@ -154,7 +161,7 @@ onMounted(() => {
         <v-form @submit.prevent="loadDataTable">
           <v-row>
             <v-col>
-              <v-text-field v-model.trim="filterDoctorName" label="Profissional" hide-details />
+              <v-text-field v-model.trim="filterName" label="Nome" hide-details />
             </v-col>
             <v-col>
               <v-select
@@ -180,33 +187,57 @@ onMounted(() => {
                 hide-details
               />
             </v-col>
+
+            <v-col>
+              <div>
+                <!-- Teste básico de v-select normal -->
+                <v-select
+                  v-model="filterActive"
+                  label="Ativo"
+                  :items="activeFieldOptions"
+                  item-value="value"
+                  item-title="title"
+                  hide-details
+                  variant="outlined"
+                />
+              </div>
+            </v-col>
+
             <v-col cols="auto" class="d-flex align-center">
               <v-btn color="primary" type="submit">Filtrar</v-btn>
             </v-col>
           </v-row>
         </v-form>
       </v-sheet>
+
       <v-data-table-server
         v-model:items-per-page="itemsPerPage"
         :headers="headers"
         :items-length="total"
         :items="items"
         :loading="isLoadingList"
-        item-value="id"
+        item-value="doctorId"
         @update:options="handleDataTableUpdate"
       >
+        <template #[`item.specialty`]="{ item }">
+          <v-chip v-for="specialty of item.specialty" :key="specialty.specialtyId" class="mr-2">
+            {{ specialty.specialtyName }}
+          </v-chip>
+        </template>
         <template #[`item.status`]="{ item }">
           <v-chip>
             {{ item.status.statusName }}
           </v-chip>
         </template>
 
-        <template #[`item.spe`]="{ item }">
-          <div>{{ item.specialty }}</div>
+        <template #[`item.lActive`]="{ item }">
+          <v-chip :color="item.lActive ? 'success' : 'error'" size="small">
+            {{ item.lActive ? 'Ativo' : 'Inativo' }}
+          </v-chip>
         </template>
 
         <template #[`item.actions`]="{ item }">
-          <v-tooltip text="Deletar Profissional" location="left">
+          <v-tooltip text="Deletar profissional" location="left">
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -218,7 +249,7 @@ onMounted(() => {
               />
             </template>
           </v-tooltip>
-          <v-tooltip text="Editar Profissional" location="left">
+          <v-tooltip text="Editar profissional" location="left">
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
