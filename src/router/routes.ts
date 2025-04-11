@@ -20,6 +20,9 @@ import PatientFormPage from '@/pages/patient/PatientFormPage.vue'
 import DoctorListPage from '@/pages/doctor/DoctorListPage.vue'
 import DoctorFormPage from '@/pages/doctor/DoctorFormPage.vue'
 
+import AppointmentListPage from '@/pages/appointment/AppointmentListPage.vue'
+import AppointmentFormPage from '@/pages/appointment/AppointmentFormPage.vue'
+
 export const routes: Array<RouteRecordRaw> = [
   // Rotas que usam DefaultTemplate
   //===========================================================
@@ -195,7 +198,7 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: '/appointment',
     name: 'appointment-list',
-    component: DoctorListPage,
+    component: AppointmentListPage,
     meta: {
       requiresAuth: true,
       title: 'Médicos',
@@ -205,7 +208,7 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: '/appointment/insert',
     name: 'appointment-insert',
-    component: DoctorFormPage,
+    component: AppointmentFormPage,
     meta: {
       requiresAuth: true,
       title: 'Novo Médico',
@@ -216,7 +219,7 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: '/appointment/:id',
     name: 'appointment-update',
-    component: DoctorFormPage,
+    component: AppointmentFormPage,
     meta: {
       requiresAuth: true,
       title: 'Editar Médico',

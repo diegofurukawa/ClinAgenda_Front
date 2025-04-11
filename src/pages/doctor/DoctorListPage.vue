@@ -161,7 +161,7 @@ onMounted(() => {
         <v-form @submit.prevent="loadDataTable">
           <v-row>
             <v-col>
-              <v-text-field v-model.trim="filterName" label="Nome" hide-details />
+              <v-text-field v-model.trim="filterName" label="Nome" hide-details clearable />
             </v-col>
             <v-col>
               <v-select

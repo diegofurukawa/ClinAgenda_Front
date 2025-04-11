@@ -12,8 +12,8 @@ import router from '@/router'
 import { vMaska } from 'maska/vue'
 import {
   clearMask,
-  dateFormat,
-  DateFormatEnum,
+  // dateFormat,
+  // DateFormatEnum,
   dateMask,
   documentNumberMask,
   phoneNumberMask
@@ -47,11 +47,10 @@ const submitForm = async () => {
     ...form.value,
     documentNumber: clearMask(form.value.documentNumber),
     phoneNumber: clearMask(form.value.phoneNumber),
-    dBirthDate: dateFormat(
-      form.value.dBirthDate,
-      DateFormatEnum.FullDateAmerican.value,
-      DateFormatEnum.FullDate.value
-    )
+    //dBirthDate: dateFormat(form.value.dBirthDate, DateFormatEnum.FullDateAmerican.value)
+    dBirthDate: form.value.dBirthDate
+    // dBirthDate: dateFormat(form.value.dBirthDate, DateFormatEnum.FullDate.value)
+    // dBirthDate: dateFormat( form.value.dBirthDate, DateFormatEnum.FullDateAmerican.value, DateFormatEnum.FullDate.value )
   }
 
   const response = await request<PatientForm, null>({
@@ -126,7 +125,37 @@ onMounted(() => {
         <v-col cols="4">
           <v-text-field v-model.trim="form.patientName" label="Nome" hide-details />
         </v-col>
+
         <v-col cols="2">
+          <v-text-field
+            v-model.trim="form.documentNumber"
+            v-maska="documentNumberMask"
+            label="CPF"
+            hide-details
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="2">
+          <v-text-field
+            v-model.trim="form.phoneNumber"
+            v-maska="phoneNumberMask"
+            label="Telefone"
+            hide-details
+          />
+        </v-col>
+        <v-col cols="2">
+          <v-text-field
+            v-model.trim="form.dBirthDate"
+            v-maska="dateMask"
+            label="Data de Nascimento"
+            hide-details
+          />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="4">
           <v-select
             v-model="form.statusId"
             label="Status"
@@ -135,32 +164,6 @@ onMounted(() => {
             item-value="statusId"
             item-title="statusName"
             clearable
-            hide-details
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            v-model.trim="form.documentNumber"
-            v-maska="documentNumberMask"
-            label="CPF"
-            hide-details
-          />
-        </v-col>
-        <v-col cols="4">
-          <v-text-field
-            v-model.trim="form.phoneNumber"
-            v-maska="phoneNumberMask"
-            label="Telefone"
-            hide-details
-          />
-        </v-col>
-        <v-col cols="4">
-          <v-text-field
-            v-model.trim="form.dBirthDate"
-            v-maska="dateMask"
-            label="Data de Nascimento"
             hide-details
           />
         </v-col>
