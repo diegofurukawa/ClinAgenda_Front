@@ -177,6 +177,7 @@ onMounted(() => {
                 variant="outlined"
                 hide-details
                 clearable
+                @click:clear="loadDataTable()"
               />
             </v-col>
 
@@ -192,6 +193,7 @@ onMounted(() => {
                 clearable
                 hide-details
                 variant="outlined"
+                @click:clear="loadDataTable()"
               />
             </v-col>
             <v-col>

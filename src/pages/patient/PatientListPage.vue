@@ -166,7 +166,13 @@ onMounted(() => {
         <v-form @submit.prevent="loadDataTable">
           <v-row>
             <v-col>
-              <v-text-field v-model.trim="filterName" label="Nome" hide-details />
+              <v-text-field
+                v-model.trim="filterName"
+                label="Nome"
+                hide-details
+                clearable
+                @click:clear="loadDataTable()"
+              />
             </v-col>
             <v-col>
               <v-text-field
@@ -174,6 +180,8 @@ onMounted(() => {
                 v-maska="documentNumberMask"
                 label="CPF"
                 hide-details
+                clearable
+                @click:clear="loadDataTable()"
               />
             </v-col>
             <v-col>
@@ -184,8 +192,9 @@ onMounted(() => {
                 :items="statusItems"
                 item-value="statusId"
                 item-title="statusName"
-                clearable
                 hide-details
+                clearable
+                @click:clear="loadDataTable()"
               />
             </v-col>
 

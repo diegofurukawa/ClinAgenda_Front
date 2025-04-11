@@ -180,7 +180,7 @@ onMounted(() => {
       <v-sheet class="pa-4 mb-4">
         <v-form @submit.prevent="loadDataTable">
           <v-row>
-            <v-col>
+            <v-col class="2">
               <v-select
                 v-model="filterSpecialtyId"
                 label="Profissional"
@@ -194,7 +194,7 @@ onMounted(() => {
               />
             </v-col>
 
-            <v-col>
+            <v-col class="2">
               <v-select
                 v-model="filterSpecialtyId"
                 label="Especialidade"
@@ -204,29 +204,36 @@ onMounted(() => {
                 item-title="specialtyName"
                 clearable
                 hide-details
+                @click:clear="loadDataTable()"
               />
             </v-col>
 
-            <v-col>
+            <v-col class="3">
               <v-text-field v-model.trim="filterName" label="Paciente" hide-details clearable />
             </v-col>
 
-            <v-col>
+            <v-col class="2">
               <v-text-field
                 v-model.trim="filterDocumentNumber"
                 v-maska="documentNumberMask"
                 label="CPF"
                 hide-details
+                @click:clear="loadDataTable()"
               />
             </v-col>
           </v-row>
 
           <v-row>
-            <v-col>
-              <clin-date-picker v-model="filterddAppointmentDate" label="Data" clearable />
+            <v-col class="2">
+              <clin-date-picker
+                v-model="filterddAppointmentDate"
+                label="Data"
+                clearable
+                @click:clear="loadDataTable()"
+              />
             </v-col>
 
-            <v-col>
+            <v-col class="2">
               <v-select
                 v-model="filterStatusId"
                 label="Status"
@@ -236,10 +243,11 @@ onMounted(() => {
                 item-title="statusName"
                 clearable
                 hide-details
+                @click:clear="loadDataTable()"
               />
             </v-col>
 
-            <v-col>
+            <v-col class="2">
               <div>
                 <!-- Teste básico de v-select normal -->
                 <v-select
