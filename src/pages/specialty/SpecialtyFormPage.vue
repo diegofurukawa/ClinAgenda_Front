@@ -2,14 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
-import type { PatientForm } from '@/interfaces/specialty'
-import type { ISpecialty, GetSpecialtyListResponse } from '@/interfaces/specialty'
+import type { ISpecialty, GetSpecialtyListResponse, SpecialtyForm } from '@/interfaces/specialty'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
-import { activeFieldOptions } from '@/enum'
+import { activeFieldOptions, convertToBoolean } from '@/enum'
 
 const toastStore = useToastStore()
 const route = useRoute()
@@ -36,10 +35,10 @@ const submitForm = async () => {
     ...form.value,
     specialtyName: form.value.specialtyName,
     nScheduleDuration: form.value.nScheduleDuration,
-    lActive: form.value.lActive
+    lActive: convertToBoolean(form.value.lActive)
   }
 
-  const response = await request<PatientForm, null>({
+  const response = await request<SpecialtyForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
     endpoint:
       pageMode == PageMode.PAGE_INSERT ? 'specialty/insert' : `specialty/update/${specialtyId}`,

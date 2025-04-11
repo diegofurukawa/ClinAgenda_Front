@@ -1,4 +1,3 @@
-.
 ├── components.d.ts
 ├── env.d.ts
 ├── eslint.config.js
@@ -18,7 +17,8 @@
 │   ├── components
 │   │   ├── ClinDatePicker.vue
 │   │   ├── ClinicToast.vue
-│   │   └── ClinLoading.vue
+│   │   ├── ClinLoading.vue
+│   │   └── index.ts
 │   ├── engine
 │   │   ├── httpClient.ts
 │   │   ├── mock.ts
@@ -29,6 +29,7 @@
 │   │   ├── pageMode.ts
 │   │   └── statusType.ts
 │   ├── interfaces
+│   │   ├── appointment.ts
 │   │   ├── auth.ts
 │   │   ├── doctor.ts
 │   │   ├── index.ts
@@ -37,6 +38,9 @@
 │   │   └── status.ts
 │   ├── main.ts
 │   ├── pages
+│   │   ├── appointment
+│   │   │   ├── AppointmentFormPage.vue
+│   │   │   └── AppointmentListPage.vue
 │   │   ├── auth
 │   │   │   └── LoginPage.vue
 │   │   ├── dashboard
@@ -84,4 +88,4 @@
 ├── vite.config.mts
 └── yarn.lock
 
-22 directories, 62 files
+23 directories, 66 files

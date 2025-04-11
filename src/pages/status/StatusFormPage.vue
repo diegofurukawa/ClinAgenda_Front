@@ -2,14 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { DefaultTemplate } from '@/template'
 import { mdiCancel, mdiPlusCircle } from '@mdi/js'
-import type { PatientForm } from '@/interfaces/status'
-import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
+import type { IStatus, StatusForm, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
 import { PageMode } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
-import { activeFieldOptions, StatusTypeOptions } from '@/enum'
+import { activeFieldOptions, StatusTypeOptions, convertToBoolean } from '@/enum'
 
 const toastStore = useToastStore()
 const route = useRoute()
@@ -36,10 +35,12 @@ const submitForm = async () => {
     ...form.value,
     statusName: form.value.statusName,
     statusType: form.value.statusType,
-    lActive: form.value.lActive
+    lActive: convertToBoolean(form.value.lActive)
   }
 
-  const response = await request<PatientForm, null>({
+  console.log(body)
+
+  const response = await request<StatusForm, null>({
     method: pageMode == PageMode.PAGE_INSERT ? 'POST' : 'PUT',
     endpoint: pageMode == PageMode.PAGE_INSERT ? 'status/insert' : `status/update/${statusId}`,
     body
@@ -128,7 +129,7 @@ onMounted(() => {
             <!-- Teste Active v-select normal -->
             <v-select
               v-model="form.lActive"
-              label="Status Ativo"
+              label="Ativo"
               :items="activeFieldOptions"
               item-value="value"
               item-title="title"

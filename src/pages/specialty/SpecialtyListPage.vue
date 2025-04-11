@@ -18,7 +18,8 @@ const itemsPerPage = ref<number>(10)
 const total = ref<number>(0)
 const page = ref<number>(1)
 const items = ref<ISpecialty[]>([])
-const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
+// Inicializando apenas com Ativos
+const filterActive = ref<string>(ActiveField.ATIVO)
 
 // Console.log para debug
 console.log('ActiveField enum:', ActiveField)

@@ -21,7 +21,8 @@ const page = ref<number>(1)
 const items = ref<IDoctor[]>([])
 const specialtyItems = ref<ISpecialty[]>([])
 const statusItems = ref<IStatus[]>([])
-const filterActive = ref<string>(ActiveField.TODOS) // Inicialize com o valor padrão
+// Inicializando apenas com Ativos
+const filterActive = ref<string>(ActiveField.ATIVO)
 
 const headers = [
   {
@@ -32,8 +33,8 @@ const headers = [
     cellProps: { class: 'text-no-wrap' }
   },
   { title: 'Nome', key: 'doctorName', sortable: false },
-  { title: 'Especialidades', key: 'specialty', sortable: false },
-  { title: 'Status', key: 'status', sortable: false },
+  { title: 'Especialidades', key: 'specialty.specialtyName', sortable: false },
+  { title: 'Status', key: 'status.statusName', sortable: false },
   { title: 'Ativo', key: 'lActive', sortable: false },
   {
     title: 'Ações',
@@ -219,12 +220,14 @@ onMounted(() => {
         item-value="doctorId"
         @update:options="handleDataTableUpdate"
       >
-        <template #[`item.specialty`]="{ item }">
+        <template #[`item.specialty.specialtyName`]="{ item }">
+          <!-- {{ item.specialty }} -->
           <v-chip v-for="specialty of item.specialty" :key="specialty.specialtyId" class="mr-2">
-            {{ specialty.specialtyName }}
+            {{ item.specialty.specialtyName }}
           </v-chip>
         </template>
-        <template #[`item.status`]="{ item }">
+
+        <template #[`item.status.statusName`]="{ item }">
           <v-chip>
             {{ item.status.statusName }}
           </v-chip>

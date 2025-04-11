@@ -6,6 +6,7 @@ export interface IDoctor {
   doctorName: string
   specialty: ISpecialty
   status: IStatus
+  lActive: boolean
 }
 
 export type GetDoctorListRequest = {
@@ -14,6 +15,7 @@ export type GetDoctorListRequest = {
   doctorName: IDoctor['doctorName'] | null
   specialtyId?: ISpecialty['specialtyId'] | null
   statusId?: IStatus['statusId'] | null
+  lActive?: boolean | null
 }
 
 export type GetDoctorListResponse = {
@@ -25,6 +27,6 @@ export type DoctorForm = {
   doctorName: IDoctor['doctorName']
   specialty: Array<ISpecialty['specialtyId']>
   statusId: IStatus['statusId'] | null
-  lActive: boolean | null
+  lActive?: boolean | null
 }
 

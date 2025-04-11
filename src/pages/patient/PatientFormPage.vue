@@ -6,7 +6,7 @@ import type { PatientForm } from '@/interfaces/patient'
 import type { IStatus, GetStatusListResponse } from '@/interfaces/status'
 import request from '@/engine/httpClient'
 import { useRoute } from 'vue-router'
-import { PageMode } from '@/enum'
+import { PageMode, convertToBoolean, activeFieldOptions } from '@/enum'
 import { useToastStore } from '@/stores'
 import router from '@/router'
 import { vMaska } from 'maska/vue'
@@ -47,10 +47,8 @@ const submitForm = async () => {
     ...form.value,
     documentNumber: clearMask(form.value.documentNumber),
     phoneNumber: clearMask(form.value.phoneNumber),
-    //dBirthDate: dateFormat(form.value.dBirthDate, DateFormatEnum.FullDateAmerican.value)
-    dBirthDate: form.value.dBirthDate
-    // dBirthDate: dateFormat(form.value.dBirthDate, DateFormatEnum.FullDate.value)
-    // dBirthDate: dateFormat( form.value.dBirthDate, DateFormatEnum.FullDateAmerican.value, DateFormatEnum.FullDate.value )
+    dBirthDate: form.value.dBirthDate,
+    lActive: convertToBoolean(form.value.lActive)
   }
 
   const response = await request<PatientForm, null>({
@@ -166,6 +164,21 @@ onMounted(() => {
             clearable
             hide-details
           />
+        </v-col>
+
+        <v-col cols="2">
+          <div>
+            <!-- Teste Active v-select normal -->
+            <v-select
+              v-model="form.lActive"
+              label="Ativo"
+              :items="activeFieldOptions"
+              item-value="value"
+              item-title="title"
+              hide-details
+              variant="outlined"
+            />
+          </div>
         </v-col>
       </v-row>
     </v-form>

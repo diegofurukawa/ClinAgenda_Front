@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ClinActiveFilter: typeof import('./src/components/ClinActiveFilter.vue')['default']
+    ClinChart: typeof import('./src/components/ClinChart.vue')['default']
     ClinDatePicker: typeof import('./src/components/ClinDatePicker.vue')['default']
     ClinicToast: typeof import('./src/components/ClinicToast.vue')['default']
     ClinLoading: typeof import('./src/components/ClinLoading.vue')['default']
